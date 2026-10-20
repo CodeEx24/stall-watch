@@ -24,9 +24,9 @@ begin
     if not (select relrowsecurity and relforcerowsecurity from pg_class where oid = ('builder.' || t)::regclass) then
       raise exception 'FAIL: builder.% must have RLS enabled and forced', t;
     end if;
-    if has_table_privilege('anon', 'builder.' || t, 'select,insert,update,delete')
-       or has_table_privilege('authenticated', 'builder.' || t, 'select,insert,update,delete') then
-      raise exception 'FAIL: app roles hold privileges on builder.% before STW-21', t;
+    -- grants are asserted precisely by builder_rls.sql (STW-21); anon never gets any
+    if has_table_privilege('anon', 'builder.' || t, 'select,insert,update,delete') then
+      raise exception 'FAIL: anon holds privileges on builder.%', t;
     end if;
   end loop;
   foreach t in array array['projects', 'project_slots', 'selections'] loop
@@ -47,7 +47,7 @@ begin
              and column_name in ('status', 'action', 'actor_kind') and data_type <> 'text') then
     raise exception 'FAIL: statuses must be text';
   end if;
-  raise notice 'PASS: 4 tables, RLS enabled+forced and locked, audit columns + touch triggers, nullable history product, text statuses';
+  raise notice 'PASS: 4 tables, RLS enabled+forced, no anon access, audit columns + touch triggers, nullable history product, text statuses';
 end $$;
 
 -- 2. composite keys exist as required
