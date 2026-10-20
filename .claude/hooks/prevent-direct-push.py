@@ -20,6 +20,7 @@ FORCE_FLAGS = ("--force", "--mirror", "--all", "--prune")
 
 
 def deny(reason: str) -> None:
+    reason += " (Quoted text that looks like a push, e.g. in a commit message, also triggers this; run the push as its own command.)"
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",

@@ -37,8 +37,15 @@ def first_line(text: str) -> str:
     return lines[0].strip() if lines else ""
 
 
+def is_heredoc_substitution(value: str) -> bool:
+    """`-m "$(cat <<'EOF' ...)"` — the subject is read by the heredoc check instead."""
+    return value.lstrip().startswith("$(") and "<<" in value
+
+
 def message_from_args(args):
     for i, a in enumerate(args):
+        if a in ("-m", "--message") and i + 1 < len(args) and is_heredoc_substitution(args[i + 1]):
+            return None
         if a == "--message" or re.fullmatch(r"-[a-zA-Z]*m", a):  # -m, -am, -qm
             if i + 1 < len(args):
                 return first_line(args[i + 1])
