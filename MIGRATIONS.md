@@ -5,3 +5,4 @@ Every schema change is a file in `supabase/migrations/` named `YYYYMMDDHHMMSS_wh
 | Migration | Ticket | What | Rollback |
 |---|---|---|---|
 | `20261020113000_builder_schema.sql` | STW-12 | Creates the empty `builder` schema exposed by `config.toml`; no grants | `drop schema if exists builder;` (while empty) |
+| `20261020120000_private_schema_touch_trigger.sql` | STW-15 | Schema `private` (not exposed, `public` revoked) and `private.touch_updated_at()` BEFORE UPDATE trigger fn (`search_path=''`, execute revoked from app roles) | `drop function if exists private.touch_updated_at(); drop schema if exists private;` |
