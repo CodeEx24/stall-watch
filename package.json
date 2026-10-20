@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
+    "ci": "npm run lint && npm run typecheck && npm run build",
     "test:db": "bash scripts/test-db.sh"
   },
   "engines": {

@@ -16,7 +16,7 @@ The local Claude hooks (no push to main, no force push) are a convenience and ca
    - **Block force pushes**
    - **Require a pull request before merging**, with required approvals set to **0**. (You and Claude use the same GitHub account, and GitHub doesn't let an account approve its own PR. The merge-gate review comment stands in for the approval.)
      - Under *Allowed merge methods*, untick **Squash** (the project rule is merge commit or rebase, never squash).
-   - **Require status checks to pass**: add the CI job from STW-14 (named `ci`, or whatever it shows once it has run once), and tick **Require branches to be up to date before merging**.
+   - **Require status checks to pass**: **skip this for now.** GitHub Actions can't run on the free private account (see `github-actions-billing.md`), so a required check would block every merge. Local checks (`npm run ci`, run by the merge-gate reviewer) stand in. If Actions becomes available, add the job `lint, typecheck, build` here and tick **Require branches to be up to date before merging**.
 5. Leave **Bypass list** empty.
 6. Click **Create**.
 7. Tell Claude "main is protected". Claude will check it with `gh api repos/CodeEx24/stall-watch/rulesets`.
