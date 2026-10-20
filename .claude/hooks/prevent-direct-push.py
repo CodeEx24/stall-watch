@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: block pushes to main/develop and any force push.
+"""PreToolUse hook: block pushes to main/develop and any force or mirror push.
 
-Parses each `git push` in a Bash command into arguments instead of matching
-substrings, so a branch named `x-fix` or a flag like `--follow-tags` is not
-mistaken for a force push, and `HEAD:main` / `+main` / `refs/heads/main` are
-recognised as targeting a protected branch.
+Fails closed: every `git ... push` found anywhere in the command (env-var
+prefixes, `git -c k=v`, subshells, `bash -c '...'`) is checked, and any
+force/mirror/all flag or any protected-branch name among its arguments denies
+the command. GitHub branch protection on `main` is the real control.
 """
 import json
+import os
 import re
-import shlex
 import subprocess
 import sys
 
-PROTECTED = {"main", "develop"}
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _shell import git_invocations  # noqa: E402
+
+PROTECTED = {"main", "develop", "master"}
+FORCE_FLAGS = ("--force", "--mirror", "--all", "--prune")
 
 
 def deny(reason: str) -> None:
@@ -35,44 +39,23 @@ def current_branch() -> str:
         return ""
 
 
-def push_invocations(command: str):
-    """Yield the argument list after `git push` for each push in the command."""
-    for part in re.split(r"&&|\|\||;|\n|\|", command):
-        try:
-            tokens = shlex.split(part, posix=True)
-        except ValueError:
-            tokens = part.split()
-        # Only a segment that starts with `git` is a git command; prose inside
-        # a quoted commit message that mentions "git push" is not.
-        if len(tokens) < 2 or tokens[0] != "git":
-            continue
-        if "push" in tokens[1:4]:  # git push / git -C <dir> push
-            j = tokens.index("push", 1)
-            yield tokens[j + 1:]
-
-
 def is_force(args) -> bool:
     for a in args:
-        if a.startswith("--force"):  # --force, --force-with-lease, --force-if-includes
+        if a.startswith(FORCE_FLAGS):
             return True
-        if re.fullmatch(r"-[a-zA-Z]*f[a-zA-Z]*", a):  # -f, -uf, -fu
+        if re.fullmatch(r"-[a-zA-Z]*f[a-zA-Z]*", a):  # -f, -uf
             return True
         if a.startswith("+") and len(a) > 1:  # +refspec
             return True
     return False
 
 
-def targets_protected(args, branch: str) -> bool:
-    positional = [a for a in args if not a.startswith("-")]
-    refspecs = positional[1:]  # first positional is the remote
-    if not refspecs:
-        # `git push` / `git push origin` pushes the current branch
-        return branch in PROTECTED
-    for spec in refspecs:
-        dst = spec.lstrip("+").split(":")[-1]
-        dst = dst.removeprefix("refs/heads/")
-        if dst in PROTECTED or (dst == "HEAD" and branch in PROTECTED):
-            return True
+def names_protected(args) -> bool:
+    for a in args:
+        value = a.split("=", 1)[1] if a.startswith("--") and "=" in a else a
+        for part in re.split(r"[:=]", value.lstrip("+")):
+            if part.removeprefix("refs/heads/") in PROTECTED:
+                return True
     return False
 
 
@@ -83,20 +66,24 @@ def main() -> None:
         print(f"Error: invalid hook input: {e}", file=sys.stderr)
         sys.exit(1)
 
-    command = (data.get("tool_input") or {}).get("command", "")
-    if data.get("tool_name") != "Bash" or "push" not in command:
+    if data.get("tool_name") != "Bash":
+        sys.exit(0)
+    command = (data.get("tool_input") or {}).get("command") or ""
+    if "push" not in command:
+        sys.exit(0)
+
+    pushes = list(git_invocations(command, "push"))
+    if not pushes:
         sys.exit(0)
 
     branch = current_branch()
-    for args in push_invocations(command):
+    for args in pushes:
         if is_force(args):
-            deny("Force push is blocked. Push a new commit instead of rewriting history.")
-        if targets_protected(args, branch):
-            deny(
-                "Direct push to main/develop is blocked. Push a branch named "
-                "<type>/stw-<nnn>/<title>, open a PR, and merge it after review "
-                f"(current branch: {branch or 'unknown'})."
-            )
+            deny("Force, mirror, --all and --prune pushes are blocked. Push a new commit on a feature branch instead.")
+        if names_protected(args):
+            deny("Pushing to main/develop is blocked. Push a branch named <type>/stw-<nnn>/<title> and open a PR.")
+        if branch in PROTECTED:
+            deny(f"You are on '{branch}'. Create a branch <type>/stw-<nnn>/<title> before pushing.")
     sys.exit(0)
 
 

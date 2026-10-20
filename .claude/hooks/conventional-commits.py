@@ -3,13 +3,17 @@
 
 Required subject shape: `type(scope)?: description (STW-nnn)`, for example
 `feat(stall): record every detector run (STW-32)`. The message is read from
-`-m` / `--message` arguments (shell-parsed, so apostrophes are fine) or from a
-heredoc. Commits whose message cannot be read (editor, -F file) are allowed.
+`-m` / `-am` / `-m"..."` / `--message` (shell-parsed, so apostrophes, `;` and
+newlines inside the message are fine) or from a heredoc. Commits whose message
+cannot be read (editor, `-F file`) are allowed.
 """
 import json
+import os
 import re
-import shlex
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _shell import git_invocations  # noqa: E402
 
 SUBJECT = re.compile(
     r"^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\([a-z0-9-]+\))?!?: \S.*\(STW-\d+(, ?STW-\d+)*\)$"
@@ -28,22 +32,20 @@ def deny(reason: str) -> None:
     sys.exit(0)
 
 
-def commit_subject(command: str):
-    heredoc = re.search(r"git commit[^\n]*?<<-?\s*['\"]?(\w+)['\"]?\s*\n(.*?)\n\s*\1", command, re.DOTALL)
-    if heredoc:
-        return heredoc.group(2).strip().splitlines()[0].strip()
-    for part in re.split(r"&&|\|\||;|\n", command):
-        try:
-            tokens = shlex.split(part, posix=True)
-        except ValueError:
-            continue
-        if len(tokens) < 2 or tokens[0] != "git" or "commit" not in tokens[1:4]:
-            continue
-        for i, tok in enumerate(tokens):
-            if tok in ("-m", "--message") and i + 1 < len(tokens):
-                return tokens[i + 1].strip().splitlines()[0].strip()
-            if tok.startswith("--message="):
-                return tok.split("=", 1)[1].strip().splitlines()[0].strip()
+def first_line(text: str) -> str:
+    lines = text.strip().splitlines()
+    return lines[0].strip() if lines else ""
+
+
+def message_from_args(args):
+    for i, a in enumerate(args):
+        if a == "--message" or re.fullmatch(r"-[a-zA-Z]*m", a):  # -m, -am, -qm
+            if i + 1 < len(args):
+                return first_line(args[i + 1])
+        if a.startswith("--message="):
+            return first_line(a.split("=", 1)[1])
+        if re.fullmatch(r"-[a-zA-Z]*m.+", a) and not a.startswith("--"):  # -m"msg"
+            return first_line(a.split("m", 1)[1])
     return None
 
 
@@ -54,18 +56,25 @@ def main() -> None:
         print(f"Error: invalid hook input: {e}", file=sys.stderr)
         sys.exit(1)
 
-    command = (data.get("tool_input") or {}).get("command", "")
-    if data.get("tool_name") != "Bash" or "git" not in command or "commit" not in command:
+    if data.get("tool_name") != "Bash":
+        sys.exit(0)
+    command = (data.get("tool_input") or {}).get("command") or ""
+    if "commit" not in command:
         sys.exit(0)
 
-    subject = commit_subject(command)
-    if subject is None:
-        sys.exit(0)
-    if not SUBJECT.match(subject):
-        deny(
-            f"Commit subject must be Conventional Commits ending with the Jira key, e.g. `{EXAMPLE}`. "
-            f"Types: feat fix docs style refactor perf test chore ci build revert. Got: {subject!r}"
-        )
+    heredoc = re.search(r"git[^\n]*\bcommit[^\n]*?<<-?\s*['\"]?(\w+)['\"]?\s*\n(.*?)\n\s*\1", command, re.DOTALL)
+    subjects = [first_line(heredoc.group(2))] if heredoc else []
+    for args in git_invocations(command, "commit"):
+        msg = message_from_args(args)
+        if msg is not None:
+            subjects.append(msg)
+
+    for subject in subjects:
+        if not SUBJECT.match(subject):
+            deny(
+                f"Commit subject must be Conventional Commits ending with the Jira key, e.g. `{EXAMPLE}`. "
+                f"Types: feat fix docs style refactor perf test chore ci build revert. Got: {subject!r}"
+            )
     sys.exit(0)
 
 
