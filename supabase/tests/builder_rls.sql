@@ -15,10 +15,10 @@ declare
     'selection_history:p_selection_history_select:SELECT'];
   actual text[];
 begin
-  select array_agg(tablename || ':' || policyname || ':' || cmd order by 1) into actual
+  select array_agg(tablename || ':' || policyname || ':' || cmd order by tablename || ':' || policyname || ':' || cmd) into actual
   from pg_policies where schemaname = 'builder'
     and tablename in ('projects', 'project_slots', 'selections', 'selection_history');
-  if actual is distinct from (select array_agg(e order by 1) from unnest(expected) e) then
+  if actual is distinct from (select array_agg(e order by e) from unnest(expected) e) then
     raise exception 'FAIL: builder policies are %, expected %', actual, expected;
   end if;
   foreach t in array array['projects', 'project_slots', 'selections', 'selection_history'] loop
