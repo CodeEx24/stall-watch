@@ -7,9 +7,12 @@
 Reply to Reverie3D with an estimate of about 7 hours and one specific planned submit date, before any build work starts.
 
 ## Message sent
-_Sent on: <YYYY-MM-DD HH:MM>_
+_Sent: 2026-10-20, confirmed by the candidate._
 
-> <paste the exact message here>
+The reply went to the client as a **private message**, so its text is deliberately not reproduced in the repository. The candidate confirmed it states an estimate of about 7 hours and names one specific planned submit date.
+
+## Known limitations
+AC3 asks for a copy of the message in the repo. By the candidate's decision it stays private; this note records that it was sent and what it contained, without the text.
 
 ## Testing notes
-Manual: the message states ~7 hours and one specific date; sent before STW-11 merged.
+Manual confirmation by the candidate (2026-10-20).

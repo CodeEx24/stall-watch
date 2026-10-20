@@ -1,4 +1,4 @@
-# Action for you: send the time estimate and submit date (STW-9)
+# Action for you: send the time estimate and submit date (STW-9) — DONE (2026-10-20)
 
 **Who:** you (Claude cannot send this email for you).
 **When:** before any build work starts, i.e. before STW-11 (scaffold) is merged.
@@ -25,6 +25,6 @@ Reverie3D tracks your progress against the estimate you give them. The ticket's 
 > Jocarl Basco
 
 ## Done when
-- [ ] Email sent, with about 7 hours and one specific date
-- [ ] Copy pasted into `docs/tickets/STW-9.md`
-- [ ] You told Claude, and STW-9 is Done in Jira
+- [x] Email sent, with about 7 hours and one specific date (confirmed by the candidate)
+- [x] Recorded in `docs/tickets/STW-9.md` (the message itself was private and is not reproduced)
+- [x] You told Claude, and STW-9 is Done in Jira
