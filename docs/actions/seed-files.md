@@ -1,4 +1,4 @@
-# Action for you: add the provided seed files
+# Action for you: add the provided seed files — DONE (2026-10-20)
 
 **Who:** you. The files come from the Reverie3D trial pack.
 **When:** as soon as you can. They're needed by STW-24, and their columns may shape STW-16 and STW-20.
@@ -14,5 +14,5 @@ The setup prompt says `seed.sql` and `link-test-users.sql` are **provided** and 
 4. Tell Claude "seed files added". Claude compares them with the migrations, adjusts the schema with a new migration if needed, and commits them on the STW-24 branch.
 
 ## Done when
-- [ ] `supabase/seed.sql` and `supabase/link-test-users.sql` exist locally
-- [ ] Claude has confirmed the schema matches them
+- [x] `supabase/seed.sql` and `supabase/link-test-users.sql` exist (committed unchanged in PR #12, byte-identical to the provided files)
+- [x] Claude has confirmed the schema matches them (seed.sql applies unchanged: 3 orgs, 9 projects, 43 slots, 22 selections, 26 history; no passwords or keys in either file)

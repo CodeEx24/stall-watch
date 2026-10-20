@@ -16,7 +16,8 @@ Work in progress: each ticket adds its steps, and STW-39 finalises this guide fo
    npx supabase login
    npx supabase link --project-ref <project-ref>
    ```
-5. `supabase/config.toml` is committed. `[api] schemas = ["public", "builder", "graphql_public"]` exposes the identity (`public`) and business (`builder`) schemas over the Data API; `private` is never exposed.
+5. Hosted Data API: dashboard **Project Settings → Data API → Exposed schemas** must list `public`, `builder`, `graphql_public` (never `private`). The local stack reads the same list from `config.toml`.
+6. `supabase/config.toml` is committed. `[api] schemas = ["public", "builder", "graphql_public"]` exposes the identity (`public`) and business (`builder`) schemas over the Data API; `private` is never exposed.
 
 ## 3. Local database
 ```bash
