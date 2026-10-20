@@ -1,7 +1,7 @@
 # CLAUDE.md — Stall Watch Engineering Guide
 
 Working memory for the Stall Watch codebase. Read before writing code.
-> PM project: Stall Watch (key SW). Every branch, commit and PR references SW-nnn (nnn = blueprint story number, US-nnn).
+> PM project: Jira space Stallwatch (key STW, stratyge.atlassian.net). Every branch, commit and PR references the Jira key STW-nnn. Blueprint story US-nnn maps to STW-(nnn+8), e.g. US-003 = STW-11.
 
 ## 1. Product (one paragraph)
 Stall Watch is a small multi-tenant web app where home builders pick finishes (slots such as "Kitchen – Countertop") for their projects. A scheduled stall detector finds projects that went quiet and creates in-app alerts for the builder's admins. Reverie3D staff see every builder and the detector's run history. The core constraint: the database is the security wall. Builder A must never read or write Builder B's data, and no code path may use the service-role key.
@@ -20,7 +20,7 @@ stall-watch/
   CLAUDE.md  AGENTS.md  README.md  SETUP.md  DESIGN.md  MIGRATIONS.md  .env.example
   docs/
     architecture.md            ADRs and component notes
-    tickets/                   one file per ticket: SW-nnn.md (see _TEMPLATE.md)
+    tickets/                   one file per ticket: STW-nnn.md (see _TEMPLATE.md)
   supabase/
     config.toml                exposed API schemas: public, builder
     migrations/                YYYYMMDDHHMMSS_what_it_does.sql
@@ -63,8 +63,8 @@ Database invariants on every change: RLS enabled **and forced**; every INSERT/UP
 Reuse-first: before creating a component, utility or pattern, check whether it should be a shared component, a helper, or an existing pattern to follow. Do not create a second way to do the same thing.
 
 ## 5. Git: branches, commits, PRs
-Branch: `<type>/sw-<nnn>/<short-kebab-title>` (feat, fix, chore, refactor, docs, test, perf, build, ci), e.g. `feat/sw-024/stall-detector-function`.
-Commit (Conventional Commits): `feat(stall): record every detector run (SW-024)`.
+Branch: `<type>/stw-<nnn>/<short-kebab-title>` (feat, fix, chore, refactor, docs, test, perf, build, ci), e.g. `feat/stw-32/stall-detector-function`.
+Commit (Conventional Commits): `feat(stall): record every detector run (STW-32)`.
 Flow: short branch, PR, green CI, then **merge commit or rebase — never squash** (reviewers read history). The PR description states what changed, why, and how it was verified, and restates the acceptance criteria. Commit `DESIGN.md` before the code it describes. No secrets in git, ever; `git log -p` must stay clean.
 
 ## 6. Best-practice skills (consult when building features)
@@ -80,7 +80,7 @@ Done: AC met and demonstrated; PR merged with green CI; unit, integration and SQ
 CLAUDE.md is **not** updated per ticket or feature. Update it only for durable, project-wide knowledge: best practices, architectural patterns and decisions, validation standards, coding conventions, shared workflows, reusable UI/API patterns, anti-duplication rules.
 Cadence: update only when an Epic completes or a decision becomes stable and reusable.
 Reuse-first: evaluate reuse before building (shared component? utility? existing pattern? should it be standardized?).
-Per-ticket detail lives in `docs/tickets/SW-nnn.md`, never in CLAUDE.md.
+Per-ticket detail lives in `docs/tickets/STW-nnn.md`, never in CLAUDE.md.
 Ticket doc template: Overview · Implementation details · API changes · Database changes · Dependencies on other tickets · Known limitations · Testing notes · Follow-up tasks.
 
 ## 9. Commands

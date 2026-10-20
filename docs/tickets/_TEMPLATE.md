@@ -1,9 +1,9 @@
-# SW-nnn — <Summary>
+# STW-nnn — <Summary>
 
 - **Story:** US-nnn (copy from the backlog)
 - **Epic / Feature:** EP-0x / F-0x.x
 - **Wave / Workstream / Sprint:** W? / WS-? / S?
-- **Branch:** `<type>/sw-nnn/<short-title>`
+- **Branch:** `<type>/stw-nnn/<short-title>`
 - **Status:** Draft | Ready | In Progress | Blocked | Code Review | QA Testing | UAT | Done
 
 ## Overview
@@ -19,7 +19,7 @@ Endpoints, RPCs, server actions added or changed. "None" if none.
 Migration file name, tables, policies, grants, functions, triggers, views. Include the ROLLBACK statement. "None" if none.
 
 ## Dependencies on other tickets
-Blocked By (SW-nnn) and tickets that depend on this one.
+Blocked By (STW-nnn) and tickets that depend on this one.
 
 ## Known limitations
 Cuts, shortcuts, things deliberately not done and why.
