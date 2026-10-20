@@ -1,0 +1,27 @@
+# Action for you: protect `main` on GitHub
+
+**Who:** you, the repo owner (`CodeEx24`). This is a repository setting.
+**When:** right after the CI workflow (STW-14) is merged, so the `ci` check exists and can be required.
+**Jira:** supports STW-14 ("a red PR is never merged").
+
+## Why
+The local Claude hooks (no push to main, no force push) are a convenience and can be bypassed. GitHub's branch protection is enforced on the server for everyone, including Claude's merge-gate reviewer.
+
+## Steps
+1. Open https://github.com/CodeEx24/stall-watch/settings/rules and choose **New ruleset → New branch ruleset**.
+2. Name: `protect-main`. Enforcement status: **Active**.
+3. Target branches: **Add target → Include default branch** (`main`).
+4. Turn on:
+   - **Restrict deletions**
+   - **Block force pushes**
+   - **Require a pull request before merging**, with required approvals set to **0**. (You and Claude use the same GitHub account, and GitHub doesn't let an account approve its own PR. The merge-gate review comment stands in for the approval.)
+     - Under *Allowed merge methods*, untick **Squash** (the project rule is merge commit or rebase, never squash).
+   - **Require status checks to pass**: add the CI job from STW-14 (named `ci`, or whatever it shows once it has run once), and tick **Require branches to be up to date before merging**.
+5. Leave **Bypass list** empty.
+6. Click **Create**.
+7. Tell Claude "main is protected". Claude will check it with `gh api repos/CodeEx24/stall-watch/rulesets`.
+
+## Done when
+- [ ] A direct push to `main` is rejected by GitHub
+- [ ] A PR with red CI cannot be merged
+- [ ] Squash merge is not offered

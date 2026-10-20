@@ -1,84 +1,89 @@
 #!/usr/bin/env python3
+"""PreToolUse hook: commit subjects must be Conventional Commits and cite a Jira key.
+
+Required subject shape: `type(scope)?: description (STW-nnn)`, for example
+`feat(stall): record every detector run (STW-32)`. The message is read from
+`-m` / `-am` / `-m"..."` / `--message` (shell-parsed, so apostrophes, `;` and
+newlines inside the message are fine) or from a heredoc. Commits whose message
+cannot be read (editor, `-F file`) are allowed.
+"""
 import json
-import sys
+import os
 import re
+import sys
 
-try:
-    input_data = json.load(sys.stdin)
-except json.JSONDecodeError as e:
-    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
-    sys.exit(1)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _shell import git_invocations  # noqa: E402
 
-tool_name = input_data.get("tool_name", "")
-tool_input = input_data.get("tool_input", {})
-command = tool_input.get("command", "")
+SUBJECT = re.compile(
+    r"^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\([a-z0-9-]+\))?!?: \S.*\(STW-\d+(, ?STW-\d+)*\)$"
+)
+EXAMPLE = "feat(stall): record every detector run (STW-32)"
 
-# Only validate git commit commands
-if tool_name != "Bash" or "git commit" not in command:
-    sys.exit(0)
 
-# Extract commit message from -m flag
-# Handle both -m "message" and -m 'message' formats
-match = re.search(r'git commit.*?-m\s+["\']([^"\']+)["\']', command)
-if not match:
-    # Also try heredoc format: -m "$(cat <<'EOF' ... EOF)"
-    heredoc_match = re.search(r'git commit.*?-m\s+"?\$\(cat\s+<<["\']?EOF["\']?\s*\n(.+?)\nEOF', command, re.DOTALL)
-    if heredoc_match:
-        commit_msg = heredoc_match.group(1).strip()
-    else:
-        sys.exit(0)  # Can't extract message, allow it
-else:
-    commit_msg = match.group(1)
-
-# Check if message follows Conventional Commits format
-# Format: type(scope)?: description
-# Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
-conventional_pattern = r'^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?:\s.+'
-
-if not re.match(conventional_pattern, commit_msg):
-    reason = f"""❌ Invalid commit message format
-
-Your message: {commit_msg}
-
-Commit messages must follow Conventional Commits:
-  type(scope): description
-
-Types:
-  feat:     New feature
-  fix:      Bug fix
-  docs:     Documentation changes
-  style:    Code style changes (formatting)
-  refactor: Code refactoring
-  perf:     Performance improvements
-  test:     Adding or updating tests
-  chore:    Maintenance tasks
-  ci:       CI/CD changes
-  build:    Build system changes
-  revert:   Revert previous commit
-
-Examples:
-  ✅ feat: add user authentication
-  ✅ feat(auth): implement JWT tokens
-  ✅ fix: resolve memory leak in parser
-  ✅ fix(api): handle null responses
-  ✅ docs: update API documentation
-
-Invalid:
-  ❌ Added new feature (no type)
-  ❌ feat:add feature (missing space after colon)
-  ❌ feature: add login (wrong type, use 'feat')
-
-💡 Tip: Start your message with one of the types above followed by a colon and space."""
-
-    output = {
+def deny(reason: str) -> None:
+    print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
-            "permissionDecisionReason": reason
+            "permissionDecisionReason": reason,
         }
-    }
-    print(json.dumps(output))
+    }))
     sys.exit(0)
 
-# Allow the command
-sys.exit(0)
+
+def first_line(text: str) -> str:
+    lines = text.strip().splitlines()
+    return lines[0].strip() if lines else ""
+
+
+def is_heredoc_substitution(value: str) -> bool:
+    """`-m "$(cat <<'EOF' ...)"` — the subject is read by the heredoc check instead."""
+    return value.lstrip().startswith("$(") and "<<" in value
+
+
+def message_from_args(args):
+    for i, a in enumerate(args):
+        if a in ("-m", "--message") and i + 1 < len(args) and is_heredoc_substitution(args[i + 1]):
+            return None
+        if a == "--message" or re.fullmatch(r"-[a-zA-Z]*m", a):  # -m, -am, -qm
+            if i + 1 < len(args):
+                return first_line(args[i + 1])
+        if a.startswith("--message="):
+            return first_line(a.split("=", 1)[1])
+        if re.fullmatch(r"-[a-zA-Z]*m.+", a) and not a.startswith("--"):  # -m"msg"
+            return first_line(a.split("m", 1)[1])
+    return None
+
+
+def main() -> None:
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError as e:
+        print(f"Error: invalid hook input: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if data.get("tool_name") != "Bash":
+        sys.exit(0)
+    command = (data.get("tool_input") or {}).get("command") or ""
+    if "commit" not in command:
+        sys.exit(0)
+
+    heredoc = re.search(r"git[^\n]*\bcommit[^\n]*?<<-?\s*['\"]?(\w+)['\"]?\s*\n(.*?)\n\s*\1", command, re.DOTALL)
+    subjects = [first_line(heredoc.group(2))] if heredoc else []
+    for args in git_invocations(command, "commit"):
+        msg = message_from_args(args)
+        if msg is not None:
+            subjects.append(msg)
+
+    for subject in subjects:
+        if not SUBJECT.match(subject):
+            deny(
+                f"Commit subject must be Conventional Commits ending with the Jira key, e.g. `{EXAMPLE}`. "
+                f"Types: feat fix docs style refactor perf test chore ci build revert. Got: {subject!r}"
+            )
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
