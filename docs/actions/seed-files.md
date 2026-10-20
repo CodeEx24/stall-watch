@@ -1,0 +1,18 @@
+# Action for you: add the provided seed files
+
+**Who:** you. The files come from the Reverie3D trial pack.
+**When:** as soon as you can. They're needed by STW-24, and their columns may shape STW-16 and STW-20.
+**Jira:** https://stratyge.atlassian.net/browse/STW-24
+
+## Why
+The setup prompt says `seed.sql` and `link-test-users.sql` are **provided** and must be copied into `supabase/`. The schema has to accept exactly what they insert, so Claude checks every table and column against them.
+
+## Steps
+1. Find both files in the trial materials (email attachment, zip or shared drive).
+2. Copy them into the repo as `supabase/seed.sql` and `supabase/link-test-users.sql`. Don't edit them.
+3. Make sure neither contains a real password, API key or service-role key. If one does, tell Claude before committing. Test-user passwords belong in the one-time secret links (STW-44), not in git.
+4. Tell Claude "seed files added". Claude compares them with the migrations, adjusts the schema with a new migration if needed, and commits them on the STW-24 branch.
+
+## Done when
+- [ ] `supabase/seed.sql` and `supabase/link-test-users.sql` exist locally
+- [ ] Claude has confirmed the schema matches them
