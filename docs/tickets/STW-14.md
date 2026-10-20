@@ -22,10 +22,12 @@ None.
 Blocked by STW-11. Blocks STW-37 (CI database job). After merge, `main` should be protected with this check required (`docs/actions/github-branch-protection.md`).
 
 ## Known limitations
-None. Action versions are pinned to major tags (`@v4`).
+- The workflow is in place but GitHub won't run it until Actions billing allows (`docs/actions/github-actions-billing.md`); local `npm run ci` is the gate meanwhile.
+- Action versions are pinned to major tags (`@v4`).
 
 ## Testing notes
-- A deliberate lint error was pushed to this PR once: CI failed at `npm run lint` (run link in the PR). It was then reverted, and CI is green.
+- GitHub Actions does not start jobs on this free private account (billing annotation on run 39411386914). By owner decision, CI is bypassed on GitHub and the same steps run locally: `npm run ci` = lint, then typecheck, then build. The merge-gate reviewer runs `npm ci && npm run ci` in a clean worktree for every PR.
+- AC2 demo: commit `6038a73` added `src/app/lint-canary.ts` with an `any`. `npm run lint` exited **1** (`@typescript-eslint/no-explicit-any`). Commit `6305217` reverted it, and `npm run ci` exits **0**.
 - `grep -n secrets .github/workflows/ci.yml` finds nothing.
 
 ## Follow-up tasks
