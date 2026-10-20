@@ -9,7 +9,9 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "ci": "npm run lint && npm run typecheck && npm run build",
-    "test:db": "bash scripts/test-db.sh"
+    "test:db": "bash scripts/test-db.sh",
+    "db:local-users": "bash scripts/create-local-test-users.sh",
+    "db:local-link": "bash scripts/link-local-test-users.sh"
   },
   "engines": {
     "node": ">=20.9"
