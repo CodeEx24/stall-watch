@@ -22,7 +22,7 @@ The database must be rebuildable from the repo, so Claude links the CLI to your 
    ! npx supabase login
    ```
    A browser window opens; approve it. The access token is stored on your machine, not in the repo.
-6. Link the repo. Claude runs `supabase link` and will ask you to type the database password into the terminal prompt yourself. If the prompt can't appear, type this yourself:
+6. Link the repo. Claude runs `supabase link` and will ask you to type the database password into the terminal prompt yourself. **Never pass the password as a `-p` / `--password` argument**: output and arguments of `!` commands land in the chat transcript. If the prompt can't appear, type this yourself and enter the password only at the hidden prompt:
    ```
    ! npx supabase link --project-ref <your-ref>
    ```
