@@ -17,12 +17,20 @@ fi
 failed=0
 for f in "${files[@]}"; do
   echo "== $f"
+  status=0
   if [ -n "${DB_URL:-}" ]; then
-    out=$(psql "$DB_URL" -X -q -v ON_ERROR_STOP=1 -f "$f" 2>&1) || failed=1
+    out=$(psql "$DB_URL" -X -q -v ON_ERROR_STOP=1 -f "$f" 2>&1) || status=$?
   else
-    out=$(docker exec -i "$CONTAINER" psql -U postgres -X -q -v ON_ERROR_STOP=1 -f - < "$f" 2>&1) || failed=1
+    out=$(docker exec -i "$CONTAINER" psql -U postgres -X -q -v ON_ERROR_STOP=1 -f - < "$f" 2>&1) || status=$?
   fi
-  echo "$out" | grep -E "PASS|FAIL|ERROR" | sed -E 's/^psql:[^ ]+ (NOTICE|ERROR): +/  \1 /'
+  if [ "$status" -ne 0 ]; then
+    failed=1
+    echo "  exit $status; full output:"
+    echo "$out" | sed 's/^/    /'
+  else
+    # a passing file may print no PASS lines; that is fine
+    echo "$out" | grep -E "PASS|FAIL|ERROR" | sed -E 's/^psql:[^ ]+ (NOTICE|ERROR): +/  \1 /' || true
+  fi
 done
 
 if [ "$failed" -ne 0 ]; then
