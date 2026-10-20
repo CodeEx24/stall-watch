@@ -1,4 +1,4 @@
-# Action for you: create the Supabase project and log in the CLI (STW-12)
+# Action for you: create the Supabase project and log in the CLI (STW-12) — DONE (2026-10-20, ref wgfxpdrlijzxkqaxlrbc)
 
 **Who:** you. It involves your Supabase account, org, billing and the database password.
 **When:** any time now. Claude needs it before the database work (STW-15 onward).

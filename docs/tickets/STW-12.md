@@ -27,7 +27,7 @@ Blocked by STW-11 (done). Blocks STW-13 (env values) and STW-15 (first migration
 **Person action:** create the hosted project and log in the CLI (`docs/actions/STW-12-create-supabase-project.md`). `supabase link` needs the project ref, plus the database password typed at the prompt.
 
 ## Known limitations
-- `supabase link` is pending the person action. STW-12 stays In Progress in Jira until the link succeeds and is recorded here.
+- Linked 2026-10-20: `npx supabase link --project-ref wgfxpdrlijzxkqaxlrbc` returned `{"project_ref":"wgfxpdrlijzxkqaxlrbc"}`; `supabase/.temp/` (gitignored) holds the link. `pg_cron` enabled in the dashboard (a setting, not a schema object).
 - `supabase/seed.sql` and `supabase/link-test-users.sql` are "provided" but not in the repo yet; `db reset` warns until they're added (STW-24).
 
 ## Testing notes
@@ -36,4 +36,4 @@ Blocked by STW-11 (done). Blocks STW-13 (env values) and STW-15 (first migration
 - Dashboard check after linking: no tables, functions or policies created by hand.
 
 ## Follow-up tasks
-Record the `supabase link` output here once the ref is provided.
+Push migrations to the hosted project and expose `builder` there (`docs/actions/hosted-database.md`).
