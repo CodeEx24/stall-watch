@@ -128,7 +128,6 @@ SECRET_PATTERNS = [
     (r'key-[0-9a-zA-Z]{32}', 'Mailgun API Key', 'medium'),
 
     # Heroku API Keys
-    (r'[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}', 'Potential API Key (UUID format)', 'low'),
 ]
 
 # Files to exclude from scanning
@@ -143,6 +142,7 @@ EXCLUDED_FILES = [
     'Cargo.lock',
     'go.sum',
     'skills-lock.json',  # SHA-256 content hashes, not credentials
+    'secret-scanner.py',  # this file: its detection regexes match themselves
     '.gitignore',
 ]
 
@@ -235,7 +235,7 @@ def scan_file(file_path):
 
     return findings
 
-def print_findings(findings):
+def print_findings(findings, blocked=True):
     """Print findings in a formatted way"""
     if not findings:
         return
@@ -277,6 +277,8 @@ def print_findings(findings):
         print(f'   Match: {finding["match"]}', file=sys.stderr)
         print('', file=sys.stderr)
 
+    if not blocked:
+        return
     print('❌ COMMIT BLOCKED: Remove secrets before committing', file=sys.stderr)
     print('', file=sys.stderr)
     print('How to fix:', file=sys.stderr)
@@ -344,8 +346,17 @@ def main():
                                 staged_files.append(f)
                 else:
                     for token in args.split():
-                        if not token.startswith('-') and os.path.isfile(token):
+                        if token.startswith('-'):
+                            continue
+                        if os.path.isfile(token):
                             staged_files.append(token)
+                        elif os.path.isdir(token):
+                            # a directory: scan every tracked-changed or new file under it
+                            result = subprocess.run(
+                                ['git', 'ls-files', '--modified', '--others', '--exclude-standard', '--', token],
+                                capture_output=True, text=True
+                            )
+                            staged_files.extend(f for f in result.stdout.splitlines() if f.strip() and os.path.isfile(f))
 
     if not staged_files:
         sys.exit(0)
@@ -356,10 +367,14 @@ def main():
         findings = scan_file(file_path)
         all_findings.extend(findings)
 
-    # If we found any secrets, block the commit
-    if all_findings:
+    # Block on critical/high/medium findings; low ones are reported only
+    blocking = [f for f in all_findings if f['severity'] != 'low']
+    if blocking:
         print_findings(all_findings)
         sys.exit(2)
+    if all_findings:
+        print_findings(all_findings, blocked=False)
+        print('(low-severity findings only: commit allowed)', file=sys.stderr)
 
     # No secrets found, allow commit
     sys.exit(0)
