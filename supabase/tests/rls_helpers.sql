@@ -102,16 +102,17 @@ do $$
 begin
   perform set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d2","role":"authenticated"}', true);
   set local role authenticated;
+  -- Direct reads are either denied (before STW-19) or filtered by p_memberships_select
+  -- (from STW-19); either way the helper itself must see the caller's memberships.
   begin
     perform 1 from public.memberships;
-    raise exception 'FAIL: authenticated can read memberships directly';
   exception when insufficient_privilege then null;
   end;
   if cardinality(private.current_user_org_ids()) <> 2 then
     raise exception 'FAIL: helper could not read memberships under forced RLS';
   end if;
   reset role;
-  raise notice 'PASS: direct read denied, helper still works under forced RLS (owner BYPASSRLS)';
+  raise notice 'PASS: helper works under forced RLS (owner BYPASSRLS), independent of caller grants';
 end $$;
 
 -- 3. anon cannot call them
