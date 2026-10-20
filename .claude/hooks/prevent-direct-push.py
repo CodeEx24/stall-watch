@@ -1,86 +1,92 @@
 #!/usr/bin/env python3
+"""PreToolUse hook: block pushes to main/develop and any force or mirror push.
+
+Fails closed: every `git ... push` found anywhere in the command (env-var
+prefixes, `git -c k=v`, subshells, `bash -c '...'`) is checked, and any
+force/mirror/all flag or any protected-branch name among its arguments denies
+the command. GitHub branch protection on `main` is the real control.
+"""
 import json
-import sys
+import os
+import re
 import subprocess
+import sys
 
-try:
-    input_data = json.load(sys.stdin)
-except json.JSONDecodeError as e:
-    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
-    sys.exit(1)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _shell import git_invocations  # noqa: E402
 
-tool_name = input_data.get("tool_name", "")
-tool_input = input_data.get("tool_input", {})
-command = tool_input.get("command", "")
+PROTECTED = {"main", "develop", "master"}
+FORCE_FLAGS = ("--force", "--mirror", "--all", "--prune")
 
-# Only validate git push commands
-if tool_name != "Bash" or "git push" not in command:
+
+def deny(reason: str) -> None:
+    reason += " (Quoted text that looks like a push, e.g. in a commit message, also triggers this; run the push as its own command.)"
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        }
+    }))
     sys.exit(0)
 
-# Get current branch
-try:
-    current_branch = subprocess.check_output(
-        ["git", "branch", "--show-current"],
-        stderr=subprocess.DEVNULL,
-        text=True
-    ).strip()
-except:
-    current_branch = ""
 
-# Check if pushing to main or develop
-push_cmd = command
-is_force_push = "--force" in push_cmd or "-f" in push_cmd
+def current_branch() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "branch", "--show-current"], stderr=subprocess.DEVNULL, text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
 
-# Check if command or current branch targets protected branches
-targets_protected = (
-    "origin main" in push_cmd or
-    "origin develop" in push_cmd or
-    current_branch in ["main", "develop"]
-)
 
-# Block direct push to main/develop (unless force push which is already dangerous)
-if targets_protected and not is_force_push:
-    if current_branch in ["main", "develop"] or "origin main" in push_cmd or "origin develop" in push_cmd:
-        reason = f"""❌ Direct push to main/develop is not allowed!
+def is_force(args) -> bool:
+    for a in args:
+        if a.startswith(FORCE_FLAGS):
+            return True
+        if re.fullmatch(r"-[a-zA-Z]*f[a-zA-Z]*", a):  # -f, -uf
+            return True
+        if a.startswith("+") and len(a) > 1:  # +refspec
+            return True
+    return False
 
-Protected branches:
-  - main (production)
-  - develop (integration)
 
-Git Flow workflow:
-  1. Create a feature branch:
-     /feature <name>
+def names_protected(args) -> bool:
+    for a in args:
+        value = a.split("=", 1)[1] if a.startswith("--") and "=" in a else a
+        for part in re.split(r"[:=]", value.lstrip("+")):
+            if part.removeprefix("refs/heads/") in PROTECTED:
+                return True
+    return False
 
-  2. Make your changes and commit
 
-  3. Push feature branch:
-     git push origin feature/<name>
+def main() -> None:
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError as e:
+        print(f"Error: invalid hook input: {e}", file=sys.stderr)
+        sys.exit(1)
 
-  4. Create pull request:
-     gh pr create
-
-  5. After approval, merge with:
-     /finish
-
-For releases:
-  /release <version> → PR → /finish
-
-For hotfixes:
-  /hotfix <name> → PR → /finish
-
-Current branch: {current_branch}
-
-💡 Use feature/release/hotfix branches instead of pushing directly to main/develop."""
-
-        output = {
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": reason
-            }
-        }
-        print(json.dumps(output))
+    if data.get("tool_name") != "Bash":
+        sys.exit(0)
+    command = (data.get("tool_input") or {}).get("command") or ""
+    if "push" not in command:
         sys.exit(0)
 
-# Allow the command
-sys.exit(0)
+    pushes = list(git_invocations(command, "push"))
+    if not pushes:
+        sys.exit(0)
+
+    branch = current_branch()
+    for args in pushes:
+        if is_force(args):
+            deny("Force, mirror, --all and --prune pushes are blocked. Push a new commit on a feature branch instead.")
+        if names_protected(args):
+            deny("Pushing to main/develop is blocked. Push a branch named <type>/stw-<nnn>/<title> and open a PR.")
+        if branch in PROTECTED:
+            deny(f"You are on '{branch}'. Create a branch <type>/stw-<nnn>/<title> before pushing.")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
