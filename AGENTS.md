@@ -13,9 +13,9 @@ Rules for all coding agents. CLAUDE.md is canonical; this mirrors the must-follo
 - The detector must be idempotent (episode record + unique keys), record every run, mark failed runs `failed` with the error (log row outside the inner block), and be unreachable by builders and anon.
 - Schema changes only through migration files (`YYYYMMDDHHMMSS_what.sql`, header with WHY / WHAT / ROLLBACK, row in MIGRATIONS.md). Never edit an applied migration; never change schema in the dashboard.
 - Statuses are `text` + `check`, never enums. Mutable tables carry `created_at`, `updated_at`, `lock_version`.
-- Conventional Commits; branches `<type>/sw-<nnn>/<title>`; merge commit or rebase, never squash; CI green before merge.
+- Conventional Commits; branches `<type>/stw-<nnn>/<title>` (Jira key); merge commit or rebase, never squash; CI green before merge.
 - **Reuse-first:** check for a shared component, helper or existing pattern before creating a new one.
-- **Do not bloat CLAUDE.md:** it holds durable project-wide knowledge only, updated at epic completion or when a decision becomes stable. Ticket detail goes to `docs/tickets/SW-nnn.md`.
+- **Do not bloat CLAUDE.md:** it holds durable project-wide knowledge only, updated at epic completion or when a decision becomes stable. Ticket detail goes to `docs/tickets/STW-nnn.md`.
 - Verify, don't assume: query the catalog for RLS, policies and grants; test in a real browser for UI; when docs and the database disagree, the database is right.
 
 ## Definition of Done (short)
