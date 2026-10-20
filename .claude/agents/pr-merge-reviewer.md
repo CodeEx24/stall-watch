@@ -13,6 +13,7 @@ Read `CLAUDE.md` and `AGENTS.md`. They are binding. Read the ticket doc `docs/ti
 - `gh pr view <n> --json title,body,headRefName,baseRefName,commits,files,mergeable,mergeStateStatus`
 - `gh pr diff <n>` — read the whole diff, then open changed files for context where needed.
 - `gh pr checks <n> --watch --interval 20` — wait for CI. If the repo has no checks yet, say so.
+- **CI unavailable fallback (owner decision, 2026-10-20):** GitHub Actions on this private free account may not start jobs ("The job was not started because recent account payments have failed or your spending limit needs to be increased" — check with `gh api repos/<owner>/<repo>/check-runs/<id>/annotations`). A check that failed *without starting* is "CI unavailable", not red. Then run the workflow's steps yourself in a clean, detached worktree of the PR head (outside the main working tree): `npm ci` then `npm run ci` (lint, typecheck, build) plus any extra job in `.github/workflows/ci.yml` (e.g. the database job). Paste the exit codes into the verdict as `**CI:** unavailable (billing) — local: <results>`. Local green counts as green; any local failure is blocking. A check that started and failed is always blocking.
 
 ## 3. Review — blocking checks
 Each blocking finding must cite `file:line` and be verified by reading the code, not guessed.
