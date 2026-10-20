@@ -44,7 +44,8 @@ def is_heredoc_substitution(value: str) -> bool:
 
 def message_from_args(args):
     for i, a in enumerate(args):
-        if a in ("-m", "--message") and i + 1 < len(args) and is_heredoc_substitution(args[i + 1]):
+        is_message_flag = a == "--message" or re.fullmatch(r"-[a-zA-Z]*m", a)
+        if is_message_flag and i + 1 < len(args) and is_heredoc_substitution(args[i + 1]):
             return None
         if a == "--message" or re.fullmatch(r"-[a-zA-Z]*m", a):  # -m, -am, -qm
             if i + 1 < len(args):
