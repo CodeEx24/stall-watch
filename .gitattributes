@@ -1,0 +1,4 @@
+# Keep scripts and SQL LF on every OS (bash and psql choke on CRLF)
+*.sh  text eol=lf
+*.sql text eol=lf
+*.py  text eol=lf
