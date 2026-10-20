@@ -1,5 +1,5 @@
 ---
-allowed-tools: Read, Edit, Bash
+allowed-tools: Read, Bash(act:*), Bash(docker --version), Bash(find .github/workflows:*)
 argument-hint: [workflow-name]
 description: Execute GitHub Actions locally using act
 ---
@@ -30,7 +30,7 @@ Execute GitHub Actions workflow locally:
 
 3. **Local Execution**
    - Run workflow with appropriate flags
-   - Use secrets from `.env` or `.secrets`
+   - CI uses no secrets; never pass `--secret-file` or `.env` to act
    - Handle platform-specific runners
    - Monitor execution and logs
 
@@ -48,8 +48,6 @@ act --list
 # Run specific workflow
 act workflow_dispatch -W .github/workflows/$ARGUMENTS.yml
 
-# Run with secrets
-act --secret-file .env
 
 # Debug mode
 act --verbose --dry-run
