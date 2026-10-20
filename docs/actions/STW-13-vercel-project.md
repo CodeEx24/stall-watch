@@ -1,4 +1,4 @@
-# Action for you: connect the repo to Vercel and set env vars (STW-13)
+# Action for you: connect the repo to Vercel and set env vars (STW-13) — DONE (2026-10-20, https://stall-watch.vercel.app/)
 
 **Who:** you, because it uses your Vercel account and GitHub authorization.
 **When:** after Claude merges the scaffold (STW-11) and you've created the Supabase project (STW-12).
@@ -32,7 +32,7 @@ Reviewers need a live URL, and every PR needs a preview deployment. The ticket's
 Opens a small PR. Your confirmation shows the preview deployment works. Claude records the URL in the README and the ticket doc, then moves STW-13 to Done with a comment after merge.
 
 ## Done when
-- [ ] Production URL serves the hello page from `main`
-- [ ] Two `NEXT_PUBLIC_` vars set in all three environments; no service-role key anywhere
-- [ ] `.env.local` created locally
-- [ ] URL given to Claude, and a PR shows a Vercel preview
+- [x] Production URL serves the hello page from `main`
+- [x] Two `NEXT_PUBLIC_` vars set in all three environments; no service-role key anywhere
+- [x] `.env.local` created locally
+- [x] URL given to Claude, and a PR shows a Vercel preview

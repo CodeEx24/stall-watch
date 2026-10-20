@@ -2,6 +2,7 @@
 
 A small multi-tenant web app where home builders pick finishes for their projects. A scheduled detector flags projects that went quiet and alerts the builder's admins, and Reverie3D staff see every builder and the detector's run history. Postgres row-level security is the security wall; the app only ever uses the Supabase publishable key.
 
+- **Live:** https://stall-watch.vercel.app/ (production, deployed from `main`; every PR gets a Vercel preview)
 - Design: [`DESIGN.md`](DESIGN.md) · Architecture and ADRs: [`docs/architecture.md`](docs/architecture.md)
 - Engineering rules: [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)
 - Ticket notes: [`docs/tickets/`](docs/tickets/) · Steps only a person can do: [`docs/actions/`](docs/actions/)
