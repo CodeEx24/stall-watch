@@ -1,2 +1,36 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# env files: never commit real values; the template is committed
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# supabase CLI local state
+supabase/.temp
+supabase/.branches
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# python bytecode from .claude/hooks
+__pycache__/
+
 # Claude Code personal overrides
 .claude/settings.local.json
