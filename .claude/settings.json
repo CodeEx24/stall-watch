@@ -50,12 +50,11 @@
         ]
       },
       {
-        "matcher": "Write",
+        "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "if": "Write(.env*)",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Writing to .env files is blocked by hook\"}}'"
+            "command": "python \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-env-files.py"
           }
         ]
       }
