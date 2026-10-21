@@ -24,6 +24,13 @@ Work in progress: each ticket adds its steps, and STW-39 finalises this guide fo
 npx supabase start      # local Postgres + Auth + API in Docker
 npx supabase db reset   # apply migrations, then supabase/seed.sql
 ```
+Test users (local only):
+```bash
+LOCAL_TEST_PASSWORD='pick-a-local-password' npm run db:local-users   # signs up the 4 users via the local Auth API
+npm run db:local-link                                                  # runs supabase/link-test-users.sql (safe twice)
+```
+`db reset` reloads `supabase/seed.sql` and wipes auth users, so run both commands again after a reset. Hosted project: `docs/actions/STW-24-hosted-test-users.md`.
+
 Local ports are moved to **55420–55429** (API `http://127.0.0.1:55421`, DB `55422`, Studio `55423`, Inbucket `55424`), so this stack can run beside another local Supabase project on the default 5432x ports.
 
 ## 4. Push migrations to the linked project
