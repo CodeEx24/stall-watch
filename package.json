@@ -11,7 +11,8 @@
     "ci": "npm run lint && npm run typecheck && npm run build",
     "test:db": "bash scripts/test-db.sh",
     "db:local-users": "bash scripts/create-local-test-users.sh",
-    "db:local-link": "bash scripts/link-local-test-users.sh"
+    "db:local-link": "bash scripts/link-local-test-users.sh",
+    "check:migrations": "bash scripts/check-migrations.sh"
   },
   "engines": {
     "node": ">=20.9"
