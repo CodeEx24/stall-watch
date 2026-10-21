@@ -57,7 +57,7 @@ Template (fill the `<…>`; nothing else in it is secret):
 >   - Link 1: <one-time link 1>
 >   - Link 2: <one-time link 2>
 >
-> Suggested walk: sign in as Bruno (Builder B) and see Unit 4B and Unit 7C stalled with their two alerts, and that Builder A's projects are not reachable; as Ana (Builder A) see only Builder A's five projects; as staff see all nine projects and the detector's run history at /detector. Please avoid editing selections on the stalled projects: any builder change counts as activity and un-stalls them.
+> Suggested walk: sign in as Ana (Builder A) and see Lot 12 stalled and its alert; as Bruno (Builder B) see Unit 4B and Unit 7C stalled with their alerts, and that Builder A's projects are not reachable; as staff see all nine projects and the detector's run history at /detector. Please avoid editing selections on the stalled projects: any builder change counts as activity and un-stalls them.
 >
 > The app and database stay up for at least 7 days from today.
 >
@@ -66,7 +66,7 @@ Template (fill the `<…>`; nothing else in it is secret):
 
 Before sending, check: the message has the repo link, the live URL and both one-time links, and **no password**.
 
-Why the walk leads with Bruno: on 2026-10-21 a test edit on production restarted Lot 12's 7-day clock, so Builder A has no stalled project until **Lot 14 stalls on Oct 27** (alert after that night's 18:00 UTC run). Details: `STW-43-pre-submission.md` note D. If you submit on or after Oct 28 (Manila), you can add "as Ana, see Lot 14 stalled and its alert" back to the walk.
+Before sending, also confirm on the live site that Lot 12, Unit 4B and Unit 7C are still stalled and the alerts exist (`STW-43-pre-submission.md` note A/D). Production was reset to the seed on 2026-10-21, so a few days later Unit 5A (~Oct 26) and then Lot 14 (~Oct 27) also stall: if you send after that, write "stalled projects" instead of naming exactly two for Bruno.
 
 ## 4. Keep it running for 7 days
 
