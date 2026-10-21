@@ -42,3 +42,6 @@ Home builders choose finishes (slots such as "Kitchen – Countertop") for each 
 | Three schemas: `public` identity, `builder` business, `private` internals | Everything in `public` | Keeps internals off the API and lets `/detector` read the run log under a staff-only policy. |
 
 Detail and consequences: `docs/architecture.md` (ADR-001 to ADR-009).
+
+## What I'd build next
+A **late-change alert**: tell builder admins as soon as a selection is changed or cleared on a project whose set is already done (`revision` / `complete`, e.g. Lot 15). It reuses the history trigger and the existing `'late_change'` alert kind. **Built: no** (planned as STW-42). Reasoning, rough build and what to leave out: [docs/what-id-build-next.md](docs/what-id-build-next.md).
