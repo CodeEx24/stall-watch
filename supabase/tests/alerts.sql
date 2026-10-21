@@ -38,7 +38,8 @@ begin
   raise notice 'PASS: columns, composite FK, forced RLS, 2 recipient policies, grants = select + update(read_at)';
 end $$;
 
--- fixtures: Ana and Mia (Builder A), staff
+-- fixtures: Ana and Mia (Builder A), staff. Alerts use kind 'late_change' so they need no
+-- stall episode (STW-31 requires one for 'stalled'); access rules are the same for every kind.
 insert into auth.users (instance_id, id, aud, role, email) values
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-0000000004a1', 'authenticated', 'authenticated', 'alrt.ana@example.test'),
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-0000000004a2', 'authenticated', 'authenticated', 'alrt.mia@example.test'),
@@ -54,7 +55,7 @@ insert into builder.projects (id, org_id, name, status, selection_phase_started_
   ('00000000-0000-0000-0000-0000000004a5', '00000000-0000-0000-0000-0000000004a0', 'ALRT Lot', 'selection_phase', now() - interval '9 days');
 insert into builder.alerts (id, org_id, user_id, project_id, kind, message) values
   ('00000000-0000-0000-0000-0000000004a9', '00000000-0000-0000-0000-0000000004a0', '00000000-0000-0000-0000-0000000004a1',
-   '00000000-0000-0000-0000-0000000004a5', 'stalled', 'ALRT Lot has had no builder activity for 7 days');
+   '00000000-0000-0000-0000-0000000004a5', 'late_change', 'ALRT Lot: a selection changed late');
 
 -- composite FK: alert org must match the project's org
 do $$
@@ -62,7 +63,7 @@ begin
   begin
     insert into builder.alerts (org_id, user_id, project_id, kind, message)
     values ('00000000-0000-0000-0000-0000000004f0', '00000000-0000-0000-0000-0000000004a3',
-            '00000000-0000-0000-0000-0000000004a5', 'stalled', 'x');
+            '00000000-0000-0000-0000-0000000004a5', 'late_change', 'x');
     raise exception 'FAIL: alert with mismatched org accepted';
   exception when foreign_key_violation then null;
   end;
@@ -124,7 +125,7 @@ begin
   if pg_temp.as_user(ana, $q$update builder.alerts set user_id = '00000000-0000-0000-0000-0000000004a2' where id = '00000000-0000-0000-0000-0000000004a9'$q$) <> -1
      or pg_temp.as_user(ana, $q$delete from builder.alerts where id = '00000000-0000-0000-0000-0000000004a9'$q$) <> -1
      or pg_temp.as_user(staff, $q$insert into builder.alerts (org_id, user_id, project_id, kind, message)
-          values ('00000000-0000-0000-0000-0000000004a0', '00000000-0000-0000-0000-0000000004a2', '00000000-0000-0000-0000-0000000004a5', 'stalled', 'forged')$q$) <> -1 then
+          values ('00000000-0000-0000-0000-0000000004a0', '00000000-0000-0000-0000-0000000004a2', '00000000-0000-0000-0000-0000000004a5', 'late_change', 'forged')$q$) <> -1 then
     raise exception 'FAIL: insert/delete/reassign allowed';
   end if;
   raise notice 'PASS: non-recipients cannot mark read; no insert, delete or reassign';
