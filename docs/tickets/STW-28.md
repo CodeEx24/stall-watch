@@ -38,7 +38,7 @@ Uses STW-26 (`builder.v_projects`) and STW-27 (SSR clients, `requireUser()`, sig
 
 ## Testing notes
 - `supabase/tests/projects_list.sql` (rolled back): (1) `v_projects` has every column the page selects; (2) **AC3 on the real seed**: as the seeded Ana (`request.jwt.claims` + `set local role authenticated`), Lot 12 is stalled, she inserts one selection into an empty Lot 12 slot, and `is_stalled` goes true → false, `empty_slots` 3 → 2, and history records `actor_kind = 'builder'`. Skipped with a NOTICE when the seed is absent (CI without seed).
-- `npm run test:db`: 14 files, 74 PASS, 0 FAIL. `npm ci && npm run ci` (lint, typecheck, build) green.
+- `npm run test:db`: 14 files, 74 PASS, 0 FAIL; after merging origin/main at dce0c58: 16 files, 81 PASS, 0 FAIL. `npm ci && npm run ci` (lint, typecheck, build) green.
 - Playwright E2E (`next start -p 3028`, signing in through the real `/login` form), all PASS:
   - Ana: exactly Lot 12/14/15/9/3, all "Builder A", Stalled only on Lot 12; Lot 12 shows "3 of 8" empty, due 2026-10-30, links to `/projects/00000000-0000-0000-0000-00000000a012`; Lot 3 marked Archived and listed last; signed-in marker shown.
   - Mia: same 5. Bruno: exactly Unit 2A/4B/5A/7C, all "Builder B", Stalled on Unit 4B and 7C. Staff: all 9 with the correct org name per row, Stalled on Lot 12, Unit 4B, Unit 7C.
