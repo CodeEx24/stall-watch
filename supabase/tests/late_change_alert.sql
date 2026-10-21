@@ -264,7 +264,7 @@ begin
   begin
     perform private.raise_late_change_alert();
     raise exception 'FAIL: authenticated called the trigger function';
-  exception when insufficient_privilege or feature_not_supported then null;
+  exception when insufficient_privilege then null;  -- 42501 only: the execute check, not "only callable as trigger"
   end;
   reset role;
   raise notice 'PASS: authenticated cannot call private.raise_late_change_alert()';
