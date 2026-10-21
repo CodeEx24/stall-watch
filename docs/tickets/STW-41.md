@@ -31,7 +31,7 @@ Builds on what has merged: STW-23 (history trigger), STW-22/31 (alerts and episo
 - The rule ("changed/cleared while status is revision or complete") is a proposal. STW-42 should confirm it before building.
 
 ## Testing notes
-Docs only: no code, no migration. Checked every claim against the merged migrations: the `alerts.kind` check allows `'late_change'`, `alerts_episode_user_key`, the `v_projects.selection_due_date` column, and the `actor_kind` computed in `private.record_selection_history()`. The DESIGN.md link resolves to the new file.
+Docs only: no code, no migration. Checked every claim against the merged migrations, `supabase/seed.sql` and `src/`. Migrations: the `alerts.kind` check allows `'late_change'`, `alerts_episode_user_key`, the `v_projects.selection_due_date` column, and the `actor_kind` computed in `private.record_selection_history()`. Seed: Lot 14 (3 of 6 filled, due in 2 days) and Lot 15 (`revision`, all filled). `src/`: the `/projects` list with due date and empty slots arrives with STW-28 (PR #28), and the `/alerts` inbox (`AlertInbox.tsx`) does not render `kind` yet, so the write-up describes both as such. The DESIGN.md link resolves to the new file. `npm ci && npm run ci` (lint, typecheck, build) was run locally.
 
 ## Follow-up tasks
 - STW-42: implement the late-change alert as described.
