@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Create the four Stall Watch test users on the LOCAL Supabase stack only.
 #
-#   LOCAL_TEST_PASSWORD=<your-local-password-placeholder> npm run db:local-users
+#   read -rs LOCAL_TEST_PASSWORD && export LOCAL_TEST_PASSWORD   # type it; nothing is echoed
+#   npm run db:local-users
+#
+#   (Reading it at a hidden prompt keeps it out of shell history; see SETUP.md A3.)
 #
 # - Signs each user up through the local Auth API with the publishable key, the same
 #   path as the app (no service-role key). Local signup auto-confirms

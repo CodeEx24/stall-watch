@@ -195,20 +195,29 @@ Auth settings: keep the defaults (Email provider on, email + password). No OAuth
 
 # Part C — CI
 
-`.github/workflows/ci.yml` runs on every pull request and every push to `main`, with a read-only token and **no secrets**:
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`, with a read-only token and **no secrets**. It has two jobs:
+
+**`ci` — lint, typecheck, build**
 1. checkout (credentials not persisted), Node 22 with npm cache
 2. `npm ci`
 3. `npm run lint` (ESLint: next core-web-vitals + typescript)
 4. `npm run typecheck` (`next typegen`, then `tsc --noEmit`, strict)
 5. `npm run build` (production build, telemetry off)
 
+**`database` — migrations, seed, SQL tests** (STW-37)
+1. `npm run check:migrations` (migration names, ledger and headers; no database)
+2. Supabase CLI 2.121.0; `supabase start` with only Postgres, Auth and Kong, then `supabase db reset` (all migrations + `seed.sql` from scratch)
+3. Create and link the four test users (`scripts/create-local-test-users.sh`, `scripts/link-local-test-users.sh`) with a random per-run password (`openssl rand -hex 16`, masked, never committed or printed)
+4. `npm run test:db` (every file in `supabase/tests/`; any failed assertion fails the job)
+5. `supabase stop --no-backup` (always)
+
 **Current status:** GitHub Actions does not start on this private repo (account billing / free-minutes limit; see `docs/actions/github-actions-billing.md`). Until that changes, the same checks run locally before every merge:
 ```bash
-npm ci && npm run ci      # lint, typecheck, build (what ci.yml runs)
-npm run test:db           # SQL tests against the local sandbox (A5)
-npm run check:migrations  # migration names, ledger and headers (no database)
+npm ci && npm run ci      # the ci job: lint, typecheck, build
+npm run check:migrations  # database job, step 1
+npm run test:db           # database job, step 4, against the local sandbox (A5)
 ```
-There is no database job in `ci.yml` yet; STW-37 adds one (start a Supabase stack, `db reset`, run `supabase/tests/`). `test:db` already accepts `DB_URL=<postgres connection URL>` for that job; never commit a real URL.
+`test:db` also accepts `DB_URL=<postgres connection URL>`; never commit a real URL.
 
 ---
 
