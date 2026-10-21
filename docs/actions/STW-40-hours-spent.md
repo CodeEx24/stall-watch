@@ -20,5 +20,7 @@ Reverie3D compares this number with the estimate you sent in STW-9 (about 7 hour
 4. Commit it on a short branch, e.g. `docs/stw-40/hours-spent`, with `docs(design): record hours spent (STW-40)`, and open a PR (or tell Claude "hours: <n>" and Claude will do it with your number, unchanged).
 
 ## Done when
+**Status checked 2026-10-21 (Claude, read-only):** **not done.** `main` still has `Hours spent: TBD (candidate to fill in before submission)` on line 2 of DESIGN.md.
+
 - [ ] Line 2 of `DESIGN.md` holds your honest total (no `TBD`)
 - [ ] The change is merged to `main` before submission

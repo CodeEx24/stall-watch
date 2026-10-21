@@ -22,6 +22,8 @@ The local Claude hooks (no push to main, no force push) are a convenience and ca
 7. Tell Claude "main is protected". Claude will check it with `gh api repos/CodeEx24/stall-watch/rulesets`.
 
 ## Done when
+**Status checked 2026-10-21 (Claude, read-only):** **not done, and not possible yet.** GitHub answers "Upgrade to GitHub Pro or make this repository public to enable this feature" (HTTP 403) for both rulesets and branch protection. Once the repo is public (STW-44 step 1) these steps work. Optional: local hooks and the merge-gate reviewer stand in.
+
 - [ ] A direct push to `main` is rejected by GitHub
 - [ ] A PR with red CI cannot be merged
 - [ ] Squash merge is not offered
