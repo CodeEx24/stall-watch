@@ -18,7 +18,9 @@
 --       authenticated.
 --       private.forbid_history_change(): BEFORE UPDATE OR DELETE on
 --       selection_history raises for everyone, so history is append-only even for
---       privileged roles.
+--       privileged roles. Single exception: an update that only sets changed_by to
+--       null, which is what `changed_by references public.users on delete set null`
+--       does when a user is deleted. The history row survives, anonymised.
 -- ROLLBACK: drop trigger if exists trg_selection_history on builder.selections;
 --           drop trigger if exists trg_selection_history_immutable on builder.selection_history;
 --           drop function if exists private.record_selection_history();
@@ -80,11 +82,21 @@ language plpgsql
 set search_path = ''
 as $$
 begin
+  -- The one permitted change: the FK action `changed_by ... on delete set null`
+  -- when a user is deleted. The row survives, anonymised; nothing else may differ.
+  if tg_op = 'UPDATE'
+     and old.changed_by is not null and new.changed_by is null
+     and (new.id, new.org_id, new.slot_id, new.action, new.product_name, new.actor_kind, new.changed_at)
+         is not distinct from
+         (old.id, old.org_id, old.slot_id, old.action, old.product_name, old.actor_kind, old.changed_at) then
+    return new;
+  end if;
   raise exception 'builder.selection_history is append-only (% blocked)', tg_op
     using errcode = 'insufficient_privilege';
 end;
 $$;
-comment on function private.forbid_history_change() is 'Blocks UPDATE/DELETE on builder.selection_history for every role.';
+comment on function private.forbid_history_change() is
+  'Blocks UPDATE/DELETE on builder.selection_history for every role, except nulling changed_by alone (the users FK on delete set null).';
 revoke execute on function private.forbid_history_change() from public, anon, authenticated;
 
 create trigger trg_selection_history_immutable
