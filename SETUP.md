@@ -38,6 +38,13 @@ Local ports are moved to **55420–55429** (API `http://127.0.0.1:55421`, DB `55
 npx supabase db push
 ```
 
+### Nightly detector schedule (STW-34)
+Migration `20261020171000_stall_detector_cron_schedule.sql` runs `create extension if not exists pg_cron` and schedules job `stall-detector-daily` at `0 18 * * *` (pg_cron uses UTC: 02:00 Asia/Manila) calling `private.run_stall_detector('scheduled')`. It is **not self-contained**:
+- Hosted: pg_cron must be enabled first in the dashboard, **Database → Extensions → pg_cron** (step 2.3; already done on the owner's project), then `npx supabase db push` creates the job. The job runs as `postgres`, the role `db push` uses, which owns the detector function.
+- Local: the Supabase image preloads pg_cron, so `db reset` creates the extension and the job.
+- Check: `select jobname, schedule, command, username from cron.job;` and, after a run, `select status, return_message from cron.job_run_details order by start_time desc limit 5;`. App roles (`anon`, `authenticated`, `service_role`) have no `usage` on schema `cron`, so only `postgres` sees or changes jobs.
+- Rollback: `select cron.unschedule('stall-detector-daily');`
+
 ## 5. App
 See [`README.md`](README.md): `npm ci`, copy `.env.example` to `.env.local` with the two `NEXT_PUBLIC_` values, `npm run dev`.
 For the local stack, `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:55421` and the publishable key from `npx supabase status` (`PUBLISHABLE_KEY`). Open `/login` and sign in as one of the test users (STW-27); signed-out visitors are sent to `/login`.
