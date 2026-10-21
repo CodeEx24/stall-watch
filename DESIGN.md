@@ -1,5 +1,5 @@
 Candidate: Jocarl Basco
-Hours spent: TBD (candidate to fill in before submission)
+Hours spent: 8
 
 # Stall Watch — Design Note
 
