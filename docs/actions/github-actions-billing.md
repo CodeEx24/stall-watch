@@ -29,4 +29,6 @@ Only do this if the trial allows a public repo: the README, DESIGN.md and code w
 Tell Claude "Actions billing fixed". Claude re-runs PR #5's CI, shows the deliberate lint failure (STW-14 AC2), reverts it, confirms green, and lets the merge gate merge.
 
 ## Done when
+**Status checked 2026-10-21 (Claude, read-only):** **not done (optional).** The latest `main` run (2026-10-21 09:23 UTC) still says "The job was not started because recent account payments have failed…". The repo is still private. Making it public (STW-44 step 1) fixes this for free.
+
 - [ ] Re-running the PR #5 workflow actually executes steps (`npm ci`, lint, …)

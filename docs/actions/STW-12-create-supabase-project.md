@@ -35,8 +35,8 @@ Runs `supabase init`, sets `[api] schemas = ["public", "builder", "graphql_publi
 The setup prompt says `seed.sql` and `link-test-users.sql` are *provided*. Neither is in the repo yet. If you have them from Reverie3D, put them in `supabase/` (or tell Claude where they are).
 
 ## Done when
-- [ ] Project created, healthy, nothing built in the dashboard
-- [ ] `pg_cron` enabled
-- [ ] `npx supabase login` done
-- [ ] Ref given to Claude; `supabase link` succeeded
-- [ ] Seed files provided (needed by STW-24)
+- [x] Project created, healthy, nothing built in the dashboard (status ACTIVE_HEALTHY; the only app tables are the 10 the migrations create)
+- [x] `pg_cron` enabled (extension installed; job `stall-detector-daily` scheduled)
+- [x] `npx supabase login` done (CLI lists the project)
+- [x] Ref given to Claude; `supabase link` succeeded (`db push --linked` works)
+- [x] Seed files provided (needed by STW-24; committed in PR #12)

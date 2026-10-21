@@ -28,4 +28,6 @@ Say "db pushed, builder exposed". Claude then checks the hosted catalog through 
 - [x] `builder` listed in the hosted Exposed schemas (and `private` not): verified, anon gets 42501 on builder and PGRST106 on private
 - [x] `npx supabase db push` finished without errors (8/8 migrations local = remote)
 
-> **Ongoing:** after every merged migration, run `! npx supabase db push` again so the hosted project stays in sync.
+> **Ongoing:** after every merged migration the hosted project must be pushed again. Since 2026-10-21 Claude does this itself through the linked CLI right after each merge.
+>
+> **Status checked 2026-10-21 (Claude, read-only):** hosted has **16 of 16** migrations (local = remote), `builder` still exposed, anon still denied.

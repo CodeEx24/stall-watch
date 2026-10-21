@@ -80,6 +80,8 @@ Before sending, check: the message has the repo link, the live URL and both one-
 **Data ages (expected):** the seed's dates are relative to when it was loaded, so a few days in, Unit 5A and then Lot 14 also become stalled and get alerts after the next nightly run. That's correct detector behaviour; nothing to fix.
 
 ## Done when
+**Status checked 2026-10-21 (Claude, read-only):** **not started.** Repo is still private (no commits since the STW-43 scan except this status update, which is docs only). The secret links and the message can't be seen by Claude: tell Claude when they're sent.
+
 - [ ] Repo is public, and the scan in `docs/tickets/STW-43.md` was clean when you published it
 - [ ] Two separate one-time links, each with the staff, Ana and Bruno logins
 - [ ] Message sent with repo link, live URL and both links; no password in it
