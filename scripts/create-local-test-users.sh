@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Create the four Stall Watch test users on the LOCAL Supabase stack only.
 #
-#   LOCAL_TEST_PASSWORD='choose-a-local-password' npm run db:local-users
+#   LOCAL_TEST_PASSWORD=<your-local-password-placeholder> npm run db:local-users
 #
 # - Signs each user up through the local Auth API with the publishable key, the same
 #   path as the app (no service-role key). Local signup auto-confirms
@@ -29,7 +29,9 @@ if [ -z "${LOCAL_TEST_PASSWORD:-}" ]; then
   exit 1
 fi
 
-if ! status_json=$(npx -y supabase@2.121.0 status -o json 2>/dev/null); then
+# SUPABASE_CLI lets CI use an installed, pinned binary; default is the pinned npx package
+read -r -a supabase_cli <<< "${SUPABASE_CLI:-npx -y supabase@2.121.0}"
+if ! status_json=$("${supabase_cli[@]}" status -o json 2>/dev/null); then
   echo "Local Supabase stack is not running (npx supabase start)." >&2
   exit 1
 fi
