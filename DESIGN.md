@@ -44,6 +44,4 @@ Home builders choose finishes (slots such as "Kitchen – Countertop") for each 
 Detail and consequences: `docs/architecture.md` (ADR-001 to ADR-009).
 
 ## What I'd build next
-A **late-change alert**: tell builder admins as soon as a selection is changed or cleared on a project whose set is already done (`revision` / `complete`, e.g. Lot 15). It reuses the history trigger and the existing `'late_change'` alert kind. Reasoning, rough build and what to leave out: [docs/what-id-build-next.md](docs/what-id-build-next.md).
-
-**Built in STW-42**, following the ticket's acceptance criteria rather than the proposal: a builder `change` or `clear` on a `revision` project gives **every staff user** one `late_change` alert (org_id = the builder org), from a definer AFTER INSERT trigger on `selection_history`, de-duplicated on `(history_id, user_id)`. Staff changes and other statuses raise nothing.
+A **late-change alert**, **built in STW-42**. When a builder changes or clears a selection on a project in `revision` (e.g. Lot 15), **every staff user** gets one `late_change` alert, with `org_id` = the builder org. It is raised by a definer AFTER INSERT trigger on `selection_history` and de-duplicated on `(history_id, user_id)`. A builder `set`, staff changes and other statuses raise nothing. Details: [docs/tickets/STW-42.md](docs/tickets/STW-42.md). History: STW-41 proposed it for builder admins on `revision` / `complete` projects. That proposal and the full list of differences are in [docs/what-id-build-next.md](docs/what-id-build-next.md).
