@@ -1,4 +1,4 @@
-# Action for you: load the seed and create the test users on the hosted project (STW-24)
+# Action for you: load the seed and create the test users on the hosted project (STW-24) — DONE (2026-10-21)
 
 **Who:** you. The passwords are yours to choose and must never be committed.
 **When:** after PRs #17/#18 merge and you've run `! npx supabase db push`, so the hosted DB has every migration.
@@ -31,6 +31,8 @@ The deployed app (https://stall-watch.vercel.app/) needs the provided sample dat
 | anonymous | denied (42501) |
 
 ## Done when
-- [ ] `seed.sql` ran once without error
-- [ ] Four users exist and are confirmed
-- [ ] `link-test-users.sql` ran clean (twice is fine)
+- [x] `seed.sql` ran once without error
+- [x] Four users exist and are confirmed
+- [x] `link-test-users.sql` ran clean (twice is fine)
+
+> **Verified 2026-10-21 (STW-38):** owner confirmed "hosted users linked". Read-only catalog check on `wgfxpdrlijzxkqaxlrbc`: 4 auth users (all confirmed), 4 memberships, 9 projects (seed loaded).

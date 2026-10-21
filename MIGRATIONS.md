@@ -19,3 +19,38 @@ Every schema change is a file in `supabase/migrations/` named `YYYYMMDDHHMMSS_wh
 | `20261020160000_stall_detector_function.sql` | STW-32 | `private.run_stall_detector(p_trigger)` returns run id: validates trigger, `pg_advisory_xact_lock(2026032)`, run row inserted before an inner `begin … exception` block that inserts episodes from `builder.v_projects.is_stalled` (on conflict do nothing) and alerts for org admins of new episodes only; failure marks the run `failed` with `left(sqlerrm, 2000)` and returns. Security definer, `search_path=''`, execute revoked from public/anon/authenticated | `drop function if exists private.run_stall_detector(text);` |
 | `20261020170000_run_stall_detector_now_rpc.sql` | STW-33 | `public.run_stall_detector_now()` returns `builder.stall_runs`: first statement raises `42501` unless `private.is_staff()`, then `private.run_stall_detector('manual')` and the run row read by id in a separate statement (READ COMMITTED-safe). Security definer, `search_path=''`, plpgsql; execute revoked from public/anon, granted to authenticated. PostgREST `POST /rest/v1/rpc/run_stall_detector_now` | `drop function if exists public.run_stall_detector_now();` |
 | `20261020171000_stall_detector_cron_schedule.sql` | STW-34 | `create extension if not exists pg_cron` (schema pg_catalog); idempotent unschedule-then-schedule of job `stall-detector-daily`, `0 18 * * *` UTC (02:00 Asia/Manila), command `select private.run_stall_detector('scheduled')`, runs as `postgres`; no secret, no HTTP; grants nothing (app roles have no usage on schema `cron`). **NOT SELF-CONTAINED**: needs pg_cron enabled (dashboard on hosted) | `select cron.unschedule('stall-detector-daily');` |
+
+## Audit (STW-38, 2026-10-21)
+
+Run `npm run check:migrations` (`scripts/check-migrations.sh`, pure bash, no DB) to re-check rules 1–3 below (plus: a migration that creates an extension or uses `cron.` must carry `NOT SELF-CONTAINED:`) on every change; the CI database job (STW-37) can call it.
+
+**Result: 15 files, 15 ledger rows, all rules pass. No migration file was edited by this audit** (all 15 are applied on the hosted project and the shared local stack, so even a header-comment fix would itself be an after-the-fact edit; gaps would have been recorded here instead, and none were found).
+
+1. **Filenames:** all match `^\d{14}_[a-z0-9_]+\.sql$`; timestamps are unique and strictly increasing (`20261020113000` … `20261020171000`).
+2. **Ledger:** exactly one row per file above, and every row names an existing file.
+3. **Headers:** every file's leading comment block has `-- WHY:`, `-- WHAT:` and `-- ROLLBACK:`. `-- NOT SELF-CONTAINED:` is required where a migration depends on something outside `supabase/migrations/`: only `20261020171000_stall_detector_cron_schedule.sql` (pg_cron must be available/enabled; job runs as the applying role; `cron.timezone`), and it has the note. Migrations that use `auth.users`, `auth.uid()` or the `anon`/`authenticated` roles (`122000`, `123000`, `124000`, `131000`, …) rely only on objects every Supabase project ships, so they need no note.
+4. **No applied migration edited after the fact:**
+
+| Migration | Commits touching it (`git log --follow`) | Hosted applied = file |
+|---|---|---|
+| `20261020113000_builder_schema.sql` | `7413f48` | yes |
+| `20261020120000_private_schema_touch_trigger.sql` | `8aeb27c` | yes |
+| `20261020121000_identity_tables.sql` | `5616ed7` | yes |
+| `20261020122000_auth_mirror_trigger.sql` | `a769414` | yes |
+| `20261020123000_rls_helper_functions.sql` | `2c8457f` | yes |
+| `20261020124000_identity_rls_policies.sql` | `76c0bba` | yes |
+| `20261020130000_builder_core_tables.sql` | `9f6fde9` | yes |
+| `20261020131000_builder_rls_policies.sql` | `7bf943f` | yes |
+| `20261020132000_alerts_table.sql` | `f7477bb` | yes |
+| `20261020133000_selection_history_trigger.sql` | `00b27d6`, `63e7a33` (see note) | yes |
+| `20261020140000_detector_tables.sql` | `4e56481` | yes |
+| `20261020150000_stall_rule_views.sql` | `2d2a4d4` | yes |
+| `20261020160000_stall_detector_function.sql` | `7745b87` | yes |
+| `20261020170000_run_stall_detector_now_rpc.sql` | `f4679a9` | yes |
+| `20261020171000_stall_detector_cron_schedule.sql` | `2a74844` | yes |
+
+"Hosted applied = file": `supabase migration list --linked` shows all 15 versions local = remote, and for each version the statements the CLI recorded in the hosted `supabase_migrations.schema_migrations.statements` equal the committed file (every statement is a verbatim substring of the file, and the concatenated statements equal the whole file ignoring whitespace and `;`). So the SQL in git is exactly what ran on the hosted database.
+
+**Note on `20261020133000_selection_history_trigger.sql` (STW-23):** the second commit `63e7a33` (2026-10-20 20:12 -04:00, "let user deletion anonymise history…") amended `private.forbid_history_change()` on the PR branch during review, **before** PR #17 merged into `main` (20:33) and before the hosted push (the hosted DB was at 8/8 migrations, through STW-21, at the time). The hosted DB therefore only ever ran the final file. The one exception is the shared local dev stack, which had applied the first version from the branch; its function was re-applied by hand with the fix (the live function body contains it), but its migration-history row still records the pre-fix statements. Rule going forward: once a migration has run on any shared database, local stack included, fix it with a new migration rather than amending the file.
+
+**Local stack history drift (not fixed here; shared stack):** `20261020170000` and `20261020171000` are applied on the shared local stack (`public.run_stall_detector_now()` and the `stall-detector-daily` job exist) but have no row in its `supabase_migrations.schema_migrations`, because parallel tickets applied them with `psql`. `supabase migration up --local` would try to apply them again. When nobody else is using the stack, record them with `npx supabase migration repair --local --status applied 20261020170000 20261020171000`, or rebuild with `npx supabase db reset` (then re-run `db:local-users` and `db:local-link`). CI and fresh clones are unaffected (`db reset` applies the files in order).
