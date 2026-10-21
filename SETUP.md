@@ -40,3 +40,4 @@ npx supabase db push
 
 ## 5. App
 See [`README.md`](README.md): `npm ci`, copy `.env.example` to `.env.local` with the two `NEXT_PUBLIC_` values, `npm run dev`.
+For the local stack, `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:55421` and the publishable key from `npx supabase status` (`PUBLISHABLE_KEY`). Open `/login` and sign in as one of the test users (STW-27); signed-out visitors are sent to `/login`.
