@@ -49,10 +49,10 @@ Blocked by STW-13 (Vercel project/env), STW-17 (auth mirror) and STW-24 (test us
 
 ## Testing notes
 Local stack (`http://127.0.0.1:55421`), `npm run build && next start -p 3027`, `.env.local` with the local publishable key.
-- `curl -i /projects` signed out → `307 location: /login`; `/` → `307 /projects`; `/login` → 200; a forged `sb-127-auth-token` cookie → `307 /login`.
+- `curl -i /projects` signed out → `307 location: /login`; `/` → `307 /projects`; `/login` → 200; a forged `sb-127-auth-token` cookie → `307 /login`; `/favicon.ico` → 200 (static files bypass the proxy). `next build` also passes with no env vars (as in CI).
 - Playwright (chromium, headless), all PASS: wrong password for ana stays on `/login` with "Invalid email or password.", email kept, no auth cookie; malformed email → same message; signed-out `/projects` → `/login`; ana's real sign-in → `/projects` showing "Signed in as ana@builder-a.test", cookie `sb-127-auth-token` (SameSite=Lax); signed-in `/login` → `/projects`; Sign out → `/login`, and `/projects` is walled again. Server log clean.
 - `git grep` for `service_role` / `sb_secret_`: only docs, warnings and the secret-scanner pattern; nothing in `src/` or config.
-- `npm run test:db` (10 files, 47 PASS) and `npm ci && npm run ci` (lint, typecheck, build) green.
+- `npm run test:db` (12 files, 65 PASS, on main incl. STW-25/26) and `npm ci && npm run ci` (lint, typecheck, build) green.
 
 ## Follow-up tasks
 - STW-28: project list on `/projects` using `createClient()` / `requireUser()`.
