@@ -43,9 +43,11 @@ Detail: `docs/architecture.md` (ADR-001 to ADR-009).
 - **Not-found and "Staff only" pages return HTTP 200.** Not-found renders after streaming starts; a real 403 needs `experimental.authInterrupts` in the shared config. Neither page shows data.
 - **`read_at` uses the app server's clock** (`new Date()`), since PostgREST can't send `now()`; `read_at >= created_at` holds unless that clock lags the database.
 
+## Interface
+Tailwind CSS v4 and shadcn/ui (Radix), customised into a warm "finish showroom" look: stone surfaces, graphite ink, a brass accent, terracotta for stalled, sage for healthy; Cormorant Garamond headings over Geist. Tokens (colour, type, radius, shadow, motion) are defined once in `globals.css` ([docs/design-system.md](docs/design-system.md)). Motion is 150–400 ms, transform/opacity only, and off under reduced motion. A static landing page at `/` explains the product. The nav hides the staff-only link; RLS still decides (STW-45).
+
 ## What I cut
 - Pagination and sorting (project list, alerts; the run log shows the latest 50).
-- Global nav and an unread badge: `/alerts` and `/detector` are reached by URL and link back to `/projects`.
 - A due-soon/overdue warning; the due date is shown raw.
 - Email/SMS, and per-org settings (the 7-day window is one constant in `private.stall_window()`; late-change alerts can't be turned off).
 - Locking archived projects: they stay editable, and an archived project in `revision` still raises late-change alerts.

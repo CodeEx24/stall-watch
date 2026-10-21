@@ -3,8 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabaseEnv } from "@/lib/env";
 
-/** Routes a signed-out visitor may open. Everything else needs a session. */
-const PUBLIC_PATHS = new Set(["/login"]);
+/**
+ * Routes a signed-out visitor may open. Everything else needs a session.
+ * "/" is the static landing page (STW-45): it reads no data.
+ */
+const PUBLIC_PATHS = new Set(["/", "/login"]);
 
 const SIGNED_IN_HOME = "/projects";
 const SIGN_IN_PATH = "/login";
