@@ -55,5 +55,12 @@ Why: RLS cannot limit columns; the grant makes "mark read changes nothing else" 
 ## ADR-009 Schema layout
 public = identity; builder = business and detector tables (so `/detector` can read the run log under a staff-only policy); private = helpers and internals, never exposed.
 
+## ADR-010 UI stack: Tailwind CSS v4, shadcn/ui and motion (STW-45)
+Decision: style with Tailwind CSS v4 (PostCSS plugin, CSS-first tokens in `src/app/globals.css`), build primitives from shadcn/ui (Radix base, copied into `src/components/ui/` and customised), animate with the `motion` library in client components only and with CSS for server-rendered entry motion. Self-host fonts with `next/font`. Add a static public landing page at `/` (the proxy lists it as public; it reads no data).
+Why: the product needed to look premium for builders; owning the component source (shadcn) lets the design be unique instead of a theme on a black-box library; Tailwind tokens keep one source of truth; CSS entry motion keeps content visible before hydration.
+Gave up: a larger dependency set (Radix, class-variance-authority, lucide-react, sonner, motion); shadcn files keep the CLI's lowercase names (`button.tsx`), an accepted exception to the PascalCase rule so `shadcn add` keeps working.
+Rejected: a full component kit (MUI, Chakra) — heavy runtime styling and a generic look; Framer Motion for all entry motion — server HTML would start invisible until JS loads.
+Unchanged: authorization stays in Postgres (ADR-002); hiding a nav link is convenience only.
+
 ## Open items
 See the workbook's Gaps & Assumptions tab (G-01 to G-20), especially G-01 (org_type value), G-04 (meaning of "flagged"), G-11 (AI-assistance policy).

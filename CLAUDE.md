@@ -10,7 +10,7 @@ Stall Watch is a small multi-tenant web app where home builders pick finishes (s
 - Next.js (App Router) + TypeScript (strict), deployed on Vercel
 - Supabase: Postgres + Auth (email and password only), `@supabase/ssr`, publishable key only
 - Scheduler: `pg_cron` calling a `security definer` function (Option A)
-- UI: plain HTML with minimal Tailwind or CSS; looks are not graded
+- UI: Tailwind CSS v4 + shadcn/ui (Radix, customised) + `motion` (ADR-010); tokens in `src/app/globals.css`, rules in `docs/design-system.md`
 - CI: GitHub Actions (lint, typecheck, build, plus a database job running seed and SQL tests)
 - Migrations: Supabase CLI; SQL tests in `supabase/tests/`
 
@@ -27,9 +27,10 @@ stall-watch/
     seed.sql  link-test-users.sql   (provided; do not edit casually)
     tests/                     SQL assertions: isolation, detector, forced RLS
   src/
-    app/                       routes: login, projects, projects/[id], alerts, detector (thin)
-    features/                  projects/, selections/, alerts/, detector/ (components, actions, queries)
-    lib/supabase/              server.ts, client.ts, middleware helper
+    app/                       routes: / (landing), login, (app)/ projects, projects/[id], alerts, detector (thin)
+    components/                shared UI: ui/ (shadcn primitives), app-shell/, brand/, motion/, PageHeader, EmptyState, StatTile
+    features/                  projects/, selections/, alerts/, detector/, auth/, landing/ (components, actions, queries)
+    lib/                       supabase/ (server.ts, client.ts, proxy), format.ts, motion.ts, utils.ts (cn)
     types/database.types.ts    generated, committed
   .github/workflows/ci.yml
 ```
