@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { SignedInAs } from "@/features/auth/components/SignedInAs";
+import { ProjectList } from "@/features/projects/components/ProjectList";
 
 export const metadata: Metadata = { title: "Projects · Stall Watch" };
 
-// Placeholder: STW-28 builds the real project list.
 export default function ProjectsPage() {
   return (
     <main>
@@ -13,7 +13,9 @@ export default function ProjectsPage() {
       <Suspense fallback={<p>Loading…</p>}>
         <SignedInAs />
       </Suspense>
-      <p>Your projects will be listed here.</p>
+      <Suspense fallback={<p>Loading projects…</p>}>
+        <ProjectList />
+      </Suspense>
     </main>
   );
 }
