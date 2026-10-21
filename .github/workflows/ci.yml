@@ -34,3 +34,47 @@ jobs:
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+
+  database:
+    # STW-37: a throwaway local Supabase stack; migrations + seed.sql + every
+    # supabase/tests/* assertion. Any failed assertion exits non-zero and fails the PR.
+    name: database (migrations, seed, SQL tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Static migration checks
+        run: npm run check:migrations
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+
+      - name: Start local Supabase (applies migrations and seed.sql)
+        # Only Postgres, Auth (test-user signup) and Kong (its gateway) are needed.
+        run: >-
+          supabase start
+          -x realtime,storage-api,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Re-apply migrations and seed.sql from scratch
+        # Explicit, so the job proves a clean `db reset` works, not only first start.
+        run: supabase db reset
+
+      - name: Create and link the four test users
+        # Random per-run password for throwaway local users; never committed or printed.
+        run: |
+          LOCAL_TEST_PASSWORD="$(openssl rand -hex 16)"
+          echo "::add-mask::$LOCAL_TEST_PASSWORD"
+          export LOCAL_TEST_PASSWORD
+          SUPABASE_CLI=supabase bash scripts/create-local-test-users.sh
+          bash scripts/link-local-test-users.sh
+
+      - name: SQL tests (isolation, forced RLS, detector, ...)
+        run: npm run test:db
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop --no-backup
