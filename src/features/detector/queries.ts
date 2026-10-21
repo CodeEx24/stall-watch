@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { z } from "zod";
 
 import { requireUser } from "@/features/auth/queries";
@@ -27,7 +28,7 @@ const staffMembershipRowsSchema = z.array(staffMembershipRowSchema);
  * walls are RLS on builder.stall_runs (p_stall_runs_select: is_staff) and the
  * is_staff check inside public.run_stall_detector_now().
  */
-async function isCurrentUserStaff(userId: string): Promise<boolean | null> {
+const isCurrentUserStaff = cache(async (userId: string): Promise<boolean | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("memberships")
@@ -40,6 +41,16 @@ async function isCurrentUserStaff(userId: string): Promise<boolean | null> {
   const parsed = staffMembershipRowsSchema.safeParse(data);
   if (!parsed.success) return null;
   return parsed.data.length > 0;
+});
+
+/**
+ * Whether the signed-in user is staff, for the app navigation only (shows or
+ * hides the Detector link). False when unknown. Hiding a link protects
+ * nothing; RLS and the RPC's is_staff check stay the walls.
+ */
+export async function isSignedInUserStaff(): Promise<boolean> {
+  const user = await requireUser();
+  return (await isCurrentUserStaff(user.id)) === true;
 }
 
 /**

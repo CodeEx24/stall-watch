@@ -26,6 +26,26 @@ export const ALERTS_LOAD_ERROR_MESSAGE = "Could not load your alerts. Please try
 const alertRowsSchema = z.array(alertRowSchema);
 
 /**
+ * How many of the signed-in user's alerts are unread, for the nav badge.
+ * A head-only count (no rows leave the database) under the same RLS wall as
+ * listMyAlerts. Null when the count could not be read; the badge then hides.
+ */
+export async function countMyUnreadAlerts(): Promise<number | null> {
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+    .schema("builder")
+    .from("alerts")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("read_at", null);
+
+  if (error || count === null) return null;
+  return count;
+}
+
+/**
  * The signed-in user's alerts, newest first (id breaks ties so the order is
  * stable when one detector run creates several alerts at the same instant).
  *

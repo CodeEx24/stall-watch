@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { PageSkeleton } from "@/components/PageSkeleton";
 import { ProjectDetail } from "@/features/selections/components/ProjectDetail";
 
 export const metadata: Metadata = { title: "Project · Stall Watch" };
@@ -10,15 +10,10 @@ export const metadata: Metadata = { title: "Project · Stall Watch" };
 // <Suspense>; the static shell holds nothing project-specific.
 export default function ProjectPage({ params }: PageProps<"/projects/[id]">) {
   return (
-    <main>
-      <p>
-        <Link href="/projects">← Projects</Link>
-      </p>
-      <Suspense fallback={<p>Loading…</p>}>
-        {params.then(({ id }) => (
-          <ProjectDetail projectId={id} />
-        ))}
-      </Suspense>
-    </main>
+    <Suspense fallback={<PageSkeleton label="Loading project" />}>
+      {params.then(({ id }) => (
+        <ProjectDetail projectId={id} />
+      ))}
+    </Suspense>
   );
 }
