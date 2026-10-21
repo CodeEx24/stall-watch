@@ -56,4 +56,4 @@ Local stack (`http://127.0.0.1:55421`), `npm run build && next start -p 3027`, `
 
 ## Follow-up tasks
 - STW-28: project list on `/projects` using `createClient()` / `requireUser()`.
-- Add `src/lib/supabase/client.ts` when the first browser-side Supabase use appears.
+- `src/lib/supabase/client.ts` exists (added for AC1) and is guarded with `import "client-only"`; the first browser-side Supabase feature (e.g. live alerts) should import it instead of creating another client.
