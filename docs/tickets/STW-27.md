@@ -27,7 +27,7 @@ Acceptance criteria:
   - `queries.ts` — `getCurrentUser()` (React `cache`, `getClaims()`, returns `{ id, email }`) and `requireUser()` (redirects to `/login`). Server-only.
   - `components/LoginForm.tsx` (client, `useActionState`), `SignedInAs.tsx` (server), `SignOutButton.tsx`.
 - `src/app/login/page.tsx` and `src/app/projects/page.tsx` stay thin. `/projects` is a placeholder (STW-28 builds the list); its session read sits inside `<Suspense>`, as Cache Components requires, and calls `requireUser()` as defense in depth behind the proxy.
-- **Browser client** `src/lib/supabase/client.ts`: `createBrowserClient` with the same env helper and publishable key, marked `"use client"`. Added to meet AC1 as written; nothing calls it yet (sign-in and sign-out are Server Actions). It's for later browser-side features. Data access stays in Server Components and Server Actions.
+- **Browser client** `src/lib/supabase/client.ts`: `createBrowserClient` with the same env helper and publishable key. Guarded by `import "client-only"` (no `"use client"` directive: with the directive a server import gets a client reference and the guard never fires). Added to meet AC1 as written; nothing calls it yet (sign-in and sign-out are Server Actions). It's for later browser-side features. Data access stays in Server Components and Server Actions.
 - Dependencies pinned exactly: `@supabase/ssr 0.12.7`, `@supabase/supabase-js 2.118.0`, `zod 4.6.7`, `server-only 0.0.1`.
 
 ## API changes
@@ -56,4 +56,4 @@ Local stack (`http://127.0.0.1:55421`), `npm run build && next start -p 3027`, `
 
 ## Follow-up tasks
 - STW-28: project list on `/projects` using `createClient()` / `requireUser()`.
-- `src/lib/supabase/client.ts` exists (added for AC1) and is guarded with `import "client-only"`; the first browser-side Supabase feature (e.g. live alerts) should import it instead of creating another client.
+- `src/lib/supabase/client.ts` exists (added for AC1). It is guarded with `import "client-only"` and has no `"use client"` directive, so importing it from a server module fails `next build` with "'client-only' cannot be imported from a Server Component module" (verified in STW-28 by a temporary import from `src/features/projects/queries.ts`). Importing it from a `"use client"` component builds fine. The first browser-side Supabase feature (e.g. live alerts) should import it instead of creating another client.

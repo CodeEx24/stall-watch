@@ -20,7 +20,7 @@ Acceptance criteria:
 - **Archived projects:** shown, with an "Archived" marker, dimmed, listed last. Hiding them would make Lot 3 vanish without explanation, and the view already never marks them stalled. A filter can come later if lists grow.
 - **Live, never cached:** `createClient()` calls `connection()`, so the list renders at request time on every load (the route builds as Partial Prerender with only the static shell prerendered). `is_stalled` is computed by the view at query time (ADR-006).
 - `src/app/projects/page.tsx` stays thin: heading, STW-27's `SignedInAs` (signed-in marker + sign out), and `ProjectList`.
-- STW-27 follow-up (separate commit, `(STW-27)`): `import "client-only"` at the top of `src/lib/supabase/client.ts`, with `client-only 0.0.1` pinned exactly (already a transitive dependency of Next). Also fixed the stale STW-27 follow-up line about adding `client.ts`.
+- STW-27 follow-up (commits `(STW-27)`): `src/lib/supabase/client.ts` now starts with `import "client-only"` and no longer has a `"use client"` directive. With the directive a server import received a client reference and the guard never fired (found in review). `client-only 0.0.1` is pinned exactly (it was already a transitive dependency of Next). Verified: a temporary import of the browser client from server-only `queries.ts` made `npm run build` fail with `Error: 'client-only' cannot be imported from a Server Component module`. A temporary `"use client"` component importing it built with exit 0. Both probes were reverted. Also fixed the stale STW-27 follow-up line about adding `client.ts`.
 
 ## API changes
 None new. Reads `GET /rest/v1/v_projects` (`Accept-Profile: builder`) as the signed-in user.
