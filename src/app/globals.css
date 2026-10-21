@@ -1,15 +1,222 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Stall Watch design tokens (STW-45). One source of truth for colour, type,
+ * radius, elevation and motion; components only use these names.
+ * Direction: a premium finish showroom — warm stone surfaces, graphite ink,
+ * a brass accent, terracotta for "stalled", sage for "healthy".
+ * The app has one light theme, so `dark:` utilities are tied to a `.dark`
+ * class that is never set (they must not react to the OS setting).
+ */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand roles beyond the shadcn set. */
+  --color-brass: var(--brass);
+  --color-brass-ink: var(--brass-ink);
+  --color-brass-soft: var(--brass-soft);
+  --color-stalled: var(--stalled);
+  --color-stalled-soft: var(--stalled-soft);
+  --color-stalled-glow: var(--stalled-glow);
+  --color-healthy: var(--healthy);
+  --color-healthy-soft: var(--healthy-soft);
+  --color-graphite: var(--graphite);
+  --color-ivory: var(--ivory);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --shadow-soft: 0 1px 2px rgb(28 25 23 / 0.04), 0 4px 16px -4px rgb(28 25 23 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(28 25 23 / 0.05), 0 16px 40px -12px rgb(28 25 23 / 0.18);
+
+  /* Motion tokens (mirrored in src/lib/motion.ts for the motion library). */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 400ms;
+
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-quint) infinite;
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    80%,
+    100% {
+      transform: scale(2.4);
+      opacity: 0;
+    }
+  }
+}
+
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.5;
+  color-scheme: light;
+
+  --ivory: #fbfaf6;
+  --graphite: #1c1917;
+
+  --background: #f6f3ec;
+  --foreground: #1c1917;
+  --card: #fffdf9;
+  --card-foreground: #1c1917;
+  --popover: #fffdf9;
+  --popover-foreground: #1c1917;
+  --primary: #1f1c19;
+  --primary-foreground: #fbfaf6;
+  --secondary: #efeae0;
+  --secondary-foreground: #2a2622;
+  --muted: #efeae0;
+  --muted-foreground: #6b635a;
+  --accent: #f1e9d8;
+  --accent-foreground: #2a2622;
+  --destructive: #b4432a;
+  --border: #e5ded2;
+  --input: #ddd5c7;
+  --ring: #b08a3e;
+
+  --brass: #b08a3e;
+  /* Brass for text: 5.2:1 on --brass-soft, 6.2:1 on white (WCAG AA). */
+  --brass-ink: #7a5c1c;
+  --brass-soft: #f3ead6;
+  --stalled: #b4432a;
+  --stalled-soft: #f8e6df;
+  /* Terracotta lifted for use on graphite surfaces (contrast 6:1 on --graphite). */
+  --stalled-glow: #e8957c;
+  --healthy: #3f6b4f;
+  --healthy-soft: #e3eee5;
+
+  --radius: 0.75rem;
 }
 
-body {
-  margin: 0;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans antialiased;
+    text-rendering: optimizeLegibility;
+    /* Cormorant defaults to old-style figures; stats need full-height numerals. */
+    font-variant-numeric: lining-nums;
+  }
+
+  body {
+    @apply min-h-dvh bg-background text-foreground;
+    /* A faint architectural grid under a warm wash: texture, not decoration. */
+    background-image:
+      radial-gradient(120% 60% at 50% -10%, rgb(176 138 62 / 0.09), transparent 60%),
+      linear-gradient(to right, rgb(28 25 23 / 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(28 25 23 / 0.025) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      48px 48px,
+      48px 48px;
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-heading tracking-tight text-balance;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    background: var(--brass-soft);
+    color: var(--graphite);
+  }
 }
 
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
+/*
+ * Entry motion for server-rendered content (FadeIn / Stagger in
+ * src/components/motion/Reveal.tsx). Pure CSS so it starts with the HTML,
+ * before hydration, and content is never stuck hidden if JS is slow.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility animate-rise {
+  animation: rise-in var(--duration-slow) var(--ease-out-quint) both;
+  animation-delay: var(--rise-delay, 0ms);
+}
+
+/* Children of a stagger container rise one after another (first 12). */
+@utility stagger-children {
+  & > * {
+    animation: rise-in var(--duration-slow) var(--ease-out-quint) both;
+  }
+  & > :nth-child(2) { animation-delay: 45ms; }
+  & > :nth-child(3) { animation-delay: 90ms; }
+  & > :nth-child(4) { animation-delay: 135ms; }
+  & > :nth-child(5) { animation-delay: 180ms; }
+  & > :nth-child(6) { animation-delay: 225ms; }
+  & > :nth-child(7) { animation-delay: 270ms; }
+  & > :nth-child(8) { animation-delay: 315ms; }
+  & > :nth-child(9) { animation-delay: 360ms; }
+  & > :nth-child(10) { animation-delay: 405ms; }
+  & > :nth-child(11) { animation-delay: 450ms; }
+  & > :nth-child(n + 12) { animation-delay: 495ms; }
+}
+
+/* Numbers line up in tables and stats. */
+@utility tabular {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
