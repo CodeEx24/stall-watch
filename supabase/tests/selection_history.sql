@@ -116,4 +116,26 @@ begin
   raise notice 'PASS: no direct history inserts by app roles; UPDATE and DELETE blocked even for the owner';
 end $$;
 
+-- 5. deleting a user with history works: the FK nulls changed_by, the row survives
+do $$
+declare n_before int; n_after int;
+begin
+  select count(*) into n_before from builder.selection_history where changed_by = '00000000-0000-0000-0000-0000000005a1';
+  if n_before = 0 then raise exception 'FAIL: fixture has no history for Ana'; end if;
+  delete from auth.users where id = '00000000-0000-0000-0000-0000000005a1';  -- cascades to public.users
+  select count(*) into n_after from builder.selection_history
+   where slot_id = '00000000-0000-0000-0000-0000000005a6' and changed_by is null and actor_kind = 'builder';
+  if n_after <> n_before then
+    raise exception 'FAIL: expected % anonymised rows, got %', n_before, n_after;
+  end if;
+  -- nulling changed_by together with any other change is still blocked
+  begin
+    update builder.selection_history set changed_by = null, actor_kind = 'builder'   -- row is 'staff': a real second change
+     where slot_id = '00000000-0000-0000-0000-0000000005a7' and changed_by is not null;
+    raise exception 'FAIL: changed_by=null plus another change was allowed';
+  exception when insufficient_privilege then null;
+  end;
+  raise notice 'PASS: deleting a user anonymises their history (changed_by null, row kept); combined edits still blocked';
+end $$;
+
 rollback;

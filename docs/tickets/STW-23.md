@@ -13,7 +13,7 @@ Migration `20261020133000_selection_history_trigger.sql`:
   - `changed_by = auth.uid()`.
   - `actor_kind = 'builder'` when the caller has a membership in the selection's org (which equals the project's org, guaranteed by the composite FKs); otherwise `'staff'`, including when there is no `auth.uid()` (SQL editor, cron).
   - **Security definer on purpose** (stated in the header): app roles have no INSERT on history (STW-21), so only this trigger writes it. No arguments; identity comes only from `auth.uid()` and the row; `search_path = ''`; execute revoked from `public`, `anon`, `authenticated`.
-- `private.forbid_history_change()` runs as `BEFORE UPDATE OR DELETE ON builder.selection_history` and raises `insufficient_privilege` for **every** role, including the owner. History is append-only.
+- `private.forbid_history_change()` runs as `BEFORE UPDATE OR DELETE ON builder.selection_history` and raises `insufficient_privilege` for **every** role, including the owner. History is append-only. The one exception is the FK action when a user is deleted (`changed_by … on delete set null`): an update that **only** nulls `changed_by` is allowed, so the row survives anonymised. Without it, deleting any user with history (for example from the Auth dashboard) failed, a bug caught in review.
 - `seed.sql` loads with triggers off (`session_replication_role = replica`), so its backdated history isn't duplicated (verified: 26 rows, 1 staff).
 
 ## API changes
@@ -35,6 +35,7 @@ Blocked by STW-21 (and stacked on STW-22 only because migrations share one local
 2. PASS: as Ana, set → change → no-op update → clear gives exactly `set|Quartz`, `change|Granite` and `clear|null`, all with `changed_by` = Ana and `actor_kind = builder`.
 3. PASS: a staff caller records `staff`; with no `auth.uid()` it records `staff` with `changed_by` null.
 4. PASS: app roles can't insert history directly; UPDATE and DELETE on history are blocked even for the owner.
+5. PASS: deleting a user with history succeeds; their rows remain with `changed_by` null; nulling `changed_by` together with any other change is still blocked.
 - `seed.sql` dry run with these triggers: 22 selections, 26 history rows, no duplicates.
 
 ## Follow-up tasks
