@@ -9,6 +9,12 @@ const CREATED_AT_FORMAT = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
+/** Shown before each alert so staff can tell a late change from a stall (STW-42). */
+const KIND_LABELS: Record<string, string> = {
+  stalled: "Stalled",
+  late_change: "Late change",
+};
+
 /** Reads the session and the caller's alerts, so render it inside <Suspense>. */
 export async function AlertInbox() {
   const result = await listMyAlerts();
@@ -56,6 +62,10 @@ function AlertItem({ alert }: { alert: AlertListItem }) {
       }}
     >
       {alert.isUnread ? <strong data-testid="alert-new">New · </strong> : null}
+      <span data-testid="alert-kind" data-kind={alert.kind}>
+        {KIND_LABELS[alert.kind] ?? "Alert"}
+      </span>
+      {" · "}
       <span data-testid="alert-project">
         {alert.projectName ? (
           <Link href={`/projects/${alert.projectId}`}>{alert.projectName}</Link>

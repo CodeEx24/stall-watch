@@ -2,7 +2,20 @@
 
 **Pick: a "late change" alert.** It tells a builder's admins, when it happens, that a selection was changed or cleared on a project whose selection set was already done (status `revision` or `complete`). The seed's Lot 15 is this case: all 6 slots filled, project in `revision`.
 
-**Built: no.** It is planned as STW-42 (stretch). This page is the plan for it.
+**Built: yes, in STW-42.** Everything below "What shipped" is the original proposal, kept as written. Where the two disagree, the shipped code is described by this list and by [`docs/tickets/STW-42.md`](tickets/STW-42.md).
+
+### What shipped (STW-42)
+The build follows the ticket's acceptance criteria. Every point below is true of the shipped code; all but the schema, trigger and UI points differ from the proposal below.
+- **Recipients:** every Reverie3D **staff user** (a member of a `staff` org) gets one alert. Builder admins get none. The alert's `org_id` is the builder org.
+- **Statuses:** only projects in **`revision`**. `complete` projects do not alert.
+- **Archived projects:** there is no `archived_at` filter, so an archived project still in `revision` alerts.
+- **Who triggers it:** only **builder** changes (`actor_kind = 'builder'`) with action `change` or `clear`. A `set` does not alert, and a staff change never alerts.
+- **No `kind = 'late_change' ⇒ history_id is not null` check.** `alerts.history_id` is nullable with no such check. The trigger always sets it.
+- **Schema, as proposed:** a `unique (id, org_id)` on `selection_history`, a composite FK `(history_id, org_id)` and the de-dup key `unique (history_id, user_id)` with `on conflict do nothing`.
+- **Message:** project, room and category, plus the **new** product for a change (`… was changed to "X" by the builder while the project is in revision.`). The old value is not included. A clear reads `… was cleared by the builder …`. The message is cut to 500 characters.
+- **Trigger and function:** `trg_late_change_alert` AFTER INSERT on `selection_history` runs `private.raise_late_change_alert()`. It is security definer with `search_path = ''`, and execute is revoked from public, anon and authenticated. No new policies or grants.
+- **UI:** `/alerts` shows a `Stalled` / `Late change` label.
+- **Test file:** `supabase/tests/late_change_alert.sql`. Migration: `20261020180000_late_change_alert_trigger.sql`.
 
 ## Who it helps
 **Builder admins.** They order materials and schedule trades against the finished set, and they get the stall alerts today. Reverie3D staff gain indirectly: they also edit selections, and once this exists a staff change on a finished project is reported to the builder instead of passing silently.

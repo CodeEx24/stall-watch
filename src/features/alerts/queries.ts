@@ -11,6 +11,7 @@ export type AlertListItem = {
   id: string;
   projectId: string;
   projectName: string | null;
+  kind: string;
   message: string;
   createdAt: string;
   isUnread: boolean;
@@ -59,6 +60,7 @@ function toListItem(row: AlertRow): AlertListItem {
     id: row.id,
     projectId: row.project_id,
     projectName: row.project?.name ?? null,
+    kind: row.kind,
     message: row.message,
     createdAt: row.created_at,
     isUnread: row.read_at === null,
