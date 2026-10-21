@@ -26,7 +26,7 @@ npx supabase db reset   # apply migrations, then supabase/seed.sql
 ```
 Test users (local only):
 ```bash
-LOCAL_TEST_PASSWORD='pick-a-local-password' npm run db:local-users   # signs up the 4 users via the local Auth API
+LOCAL_TEST_PASSWORD=<your-local-password> npm run db:local-users   # signs up the 4 users via the local Auth API
 npm run db:local-link                                                  # runs supabase/link-test-users.sql (safe twice)
 ```
 `db reset` reloads `supabase/seed.sql` and wipes auth users, so run both commands again after a reset. Hosted project: `docs/actions/STW-24-hosted-test-users.md`.
