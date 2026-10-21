@@ -2,7 +2,9 @@
 
 **Pick: a "late change" alert.** It tells a builder's admins, when it happens, that a selection was changed or cleared on a project whose selection set was already done (status `revision` or `complete`). The seed's Lot 15 is this case: all 6 slots filled, project in `revision`.
 
-**Built: no.** It is planned as STW-42 (stretch). This page is the plan for it.
+**Built: yes, in STW-42** (`20261020180000_late_change_alert_trigger.sql`, test `supabase/tests/late_change_alert.sql`, details in `docs/tickets/STW-42.md`). This page is the original proposal.
+
+The shipped version follows the STW-42 ticket's acceptance criteria, which differ from this proposal in two places: the alert goes to **every Reverie3D staff user** (not the builder's admins), and it fires only for builder changes on projects in **`revision`** (not `complete`; staff changes never alert). The trigger, `history_id` de-dup key, recipient-only RLS and the `/alerts` kind label are as proposed below.
 
 ## Who it helps
 **Builder admins.** They order materials and schedule trades against the finished set, and they get the stall alerts today. Reverie3D staff gain indirectly: they also edit selections, and once this exists a staff change on a finished project is reported to the builder instead of passing silently.
