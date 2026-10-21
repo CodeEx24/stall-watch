@@ -27,7 +27,7 @@ Acceptance criteria:
   - `queries.ts` — `getCurrentUser()` (React `cache`, `getClaims()`, returns `{ id, email }`) and `requireUser()` (redirects to `/login`). Server-only.
   - `components/LoginForm.tsx` (client, `useActionState`), `SignedInAs.tsx` (server), `SignOutButton.tsx`.
 - `src/app/login/page.tsx` and `src/app/projects/page.tsx` stay thin. `/projects` is a placeholder (STW-28 builds the list); its session read sits inside `<Suspense>`, as Cache Components requires, and calls `requireUser()` as defense in depth behind the proxy.
-- **Browser client (`src/lib/supabase/client.ts`) deliberately not added**: nothing runs Supabase in the browser yet (sign-in and sign-out are Server Actions). The first ticket that needs it (e.g. a client-side realtime view) adds it with `createBrowserClient` and the same env helper.
+- **Browser client** `src/lib/supabase/client.ts`: `createBrowserClient` with the same env helper and publishable key, marked `"use client"`. Added to meet AC1 as written; nothing calls it yet (sign-in and sign-out are Server Actions). It's for later browser-side features. Data access stays in Server Components and Server Actions.
 - Dependencies pinned exactly: `@supabase/ssr 0.12.7`, `@supabase/supabase-js 2.118.0`, `zod 4.6.7`, `server-only 0.0.1`.
 
 ## API changes
