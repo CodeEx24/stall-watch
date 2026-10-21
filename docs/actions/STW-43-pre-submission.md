@@ -112,7 +112,7 @@ Making the repo public is required for STW-44 anyway (the submission needs a pub
 **Status checked 2026-10-21 (Claude, read-only):**
 - Rebuild: **not done.** Your Supabase account has only one project (`stall-watch`), so no scratch rebuild project exists yet.
 - Advisors: **not confirmed.** Claude can't open the dashboard Advisors; reply with the result and Claude ticks it.
-- Live walk: **not done.** On the hosted project Ana, Mia and Bruno have never signed in (`last_sign_in_at` empty); staff signed in once on 2026-10-21 03:53 UTC.
+- Live walk: **not done yet** (as of 09:35 UTC). Bruno signed in at 09:31 UTC and staff last at 03:53 UTC, but Ana and Mia have never signed in on the hosted project. Tick this after you confirm the whole walk.
 - **Heads-up for the walk:** the hosted detector has **never run yet** (0 runs, 0 alerts). Its first nightly run is 18:00 UTC = 02:00 Manila. If you walk before that, sign in as Sam, open `/detector`, click **Run now** once, then Ana and Bruno see their alerts (note A).
 - Repo public / Actions green: **not done.** Repo is still private; every Actions run is "not started" (billing).
 

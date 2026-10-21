@@ -19,7 +19,7 @@ Each guide has the step-by-step instructions and its own "Done when" checklist. 
 | 1 | [STW-40-hours-spent.md](STW-40-hours-spent.md) | Put your honest hours on DESIGN.md line 2 | Not done: still `TBD` |
 | 2 | [STW-43-pre-submission.md](STW-43-pre-submission.md) § 1 | Rebuild on a throwaway 2nd Supabase project from SETUP.md | Not done: only one Supabase project exists |
 | 3 | [STW-43-pre-submission.md](STW-43-pre-submission.md) § 2 | Review Security + Performance Advisors | Not confirmed (Claude can't see the dashboard) |
-| 4 | [STW-43-pre-submission.md](STW-43-pre-submission.md) § 3 | Walk the story on the live site as Ana, Mia, Bruno, Sam | Not done: Ana, Mia, Bruno have never signed in on hosted |
+| 4 | [STW-43-pre-submission.md](STW-43-pre-submission.md) § 3 | Walk the story on the live site as Ana, Mia, Bruno, Sam | In progress? Bruno signed in (09:31 UTC); Ana and Mia never have. Tell Claude "live walk OK" when done |
 | 5 | [STW-44-submit.md](STW-44-submit.md) § 1 | Make the repo public | Not done: repo is private |
 | 6 | [STW-44-submit.md](STW-44-submit.md) § 2–3 | Two one-time secret links + send the message | Not started |
 | 7 | [STW-44-submit.md](STW-44-submit.md) § 4 | Keep Supabase + Vercel up 7 days | Starts after sending |
