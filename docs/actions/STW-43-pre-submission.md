@@ -77,21 +77,21 @@ Open https://stall-watch.vercel.app/ in a **private window** for each user (or s
 | As | Do | Expected |
 |---|---|---|
 | (signed out) | open `/projects` | lands on `/login` |
-| Ana `ana@builder-a.test` | sign in | nav shows Projects and Alerts only (no Detector); `/projects`: 5 projects (Lot 12, Lot 14, Lot 15, Lot 9, Lot 3 archived), all Builder A; **none stalled until Oct 27** (see note D) |
+| Ana `ana@builder-a.test` | sign in | nav shows Projects and Alerts only (no Detector); `/projects`: 5 projects (Lot 12, Lot 14, Lot 15, Lot 9, Lot 3 archived), all Builder A; **Lot 12 Stalled**; red **1** on Alerts |
 | Ana | click Lot 12 | 4 rooms, 8 slots |
-| Ana | open `/alerts` | **"All quiet / You have no alerts."** until Lot 14 stalls (note D) |
+| Ana | open `/alerts` | one **New · Stalled** alert for Lot 12 (see note A) |
 | Ana | open `/detector` | "Staff only", no Run now button |
 | Ana | copy the Lot 12 address bar URL (you'll need it for Bruno) | |
-| Mia `mia@builder-a.test` | sign in, `/projects`, then `/alerts` | same 5 projects; **"You have no alerts."** (members never get stall alerts) |
+| Mia `mia@builder-a.test` | sign in, `/projects`, then `/alerts` | same 5 projects with Lot 12 Stalled; **"All quiet / You have no alerts."** (members never get stall alerts) |
 | Bruno `bruno@builder-b.test` | sign in | only Unit 2A, 4B, 5A, 7C; **Unit 4B and Unit 7C Stalled**; red unread badge on Alerts (7C is the trap: staff touched it, but staff activity doesn't count) |
 | Bruno | paste Ana's Lot 12 URL | the "This page isn't on the plans" not-found page and nothing about Lot 12 |
 | Bruno | `/alerts` | two **New · Stalled** alerts, for Unit 4B and Unit 7C |
-| Sam `staff@stallwatch.test` | sign in | all 9 projects with the Builder column showing Builder A / Builder B; **Unit 4B and Unit 7C Stalled** |
+| Sam `staff@stallwatch.test` | sign in | all 9 projects with the Builder column showing Builder A / Builder B; **Lot 12, Unit 4B and Unit 7C Stalled** |
 | Sam | open `/detector` | run history table (scheduled runs at 18:00 UTC each night, plus any manual ones) |
 | Sam | `/alerts` | no stall alerts (staff only receive late-change alerts, see note B) |
 
-**Note A — no alerts yet?** Stall alerts are created by the detector, which runs nightly at 18:00 UTC (02:00 Manila). If Bruno's `/alerts` is empty, sign in as Sam, open `/detector`, click **Run now once**, and re-check Bruno. (Done on 2026-10-21 11:17 UTC: 2 projects flagged, 2 alerts for Bruno.)
-**Note D — Lot 12 is no longer stalled (2026-10-21).** At 10:49 UTC Mia set and then cleared Laundry → Floor Tile on Lot 12 on production. Any builder change is activity, so Lot 12's 7-day clock restarted (it stalls again on Oct 28) and the detector correctly sent no Builder A alert. Builder A's next stall is **Lot 14 on Oct 27 03:47 UTC**; Ana's alert arrives with that night's run (Oct 27 18:00 UTC / Oct 28 02:00 Manila). Until then, Bruno shows the full story. **On production, don't edit selections on stalled projects** (Unit 4B, Unit 7C) — that un-stalls them the same way.
+**Note A — no alerts yet?** Stall alerts are created by the detector, which runs nightly at 18:00 UTC (02:00 Manila). If Ana's `/alerts` is empty, sign in as Sam, open `/detector`, click **Run now**, and re-check: expect 3 projects flagged, 1 alert for Ana (Lot 12) and 2 for Bruno (Unit 4B, Unit 7C).
+**Note D — keep the stalls stalled.** Any builder edit counts as activity and restarts a project's 7-day clock. On 2026-10-21 a test edit un-stalled Lot 12, so production data was **reset to the seed** (wipe + `seed.sql` + `link-test-users.sql`; logins kept) and Lot 12, Unit 4B and Unit 7C are stalled again. **On production, don't edit selections on Lot 12, Unit 4B or Unit 7C**; use Lot 14 for test edits. If it happens again, ask Claude to reset production the same way.
 **Note B:** if anyone changed a selection on Lot 15 (in `revision`), Sam has a *Late change* alert. That is the STW-42 feature working, not a leak.
 **Note C — the seed ages.** `seed.sql` dates are relative to when it was loaded. About 5 days after the load, Unit 5A (entered selection phase 2 days before the load) becomes stalled, and about 6 days after, Lot 14 (last builder activity 1 day before the load), unless someone selects something there. That is the detector working correctly; mention it if a reviewer asks.
 
