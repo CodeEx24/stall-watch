@@ -1,8 +1,8 @@
-import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { BrandMark } from "@/components/brand/BrandMark";
-import { Button } from "@/components/ui/button";
+
+import { LandingNavActions } from "./LandingAuthActions";
 
 const SECTION_LINKS = [
   { href: "#how-it-works", label: "How it works" },
@@ -34,19 +34,7 @@ export function LandingNav() {
           </ul>
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <Button asChild variant="ghost" className="hidden sm:inline-flex">
-            <Link href="/login">Sign in</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/projects" className="group">
-              <span className="sm:hidden">Open app</span>
-              <span className="hidden sm:inline">Open Stall Watch</span>
-              <ArrowRight
-                aria-hidden="true"
-                className="transition-transform duration-(--duration-fast) group-hover:translate-x-0.5"
-              />
-            </Link>
-          </Button>
+          <LandingNavActions />
         </div>
       </div>
     </header>
