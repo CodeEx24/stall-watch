@@ -1,11 +1,10 @@
-import { ArrowRight, Building2, Check, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { Building2, Check, ShieldCheck } from "lucide-react";
 
 import { BrandMark } from "@/components/brand/BrandMark";
 import { HouseElevation } from "@/components/brand/HouseElevation";
 import { InView } from "@/components/motion/InView";
-import { Button } from "@/components/ui/button";
 
+import { ClosingCtaActions } from "./LandingAuthActions";
 import { SectionIntro } from "./SectionIntro";
 
 const AUDIENCES = [
@@ -84,23 +83,7 @@ export function ClosingCta() {
             Sign in with the account your team gave you and see where every selection stands today.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button asChild size="lg" variant="brass">
-              <Link href="/projects" className="group">
-                Open Stall Watch
-                <ArrowRight
-                  aria-hidden="true"
-                  className="transition-transform duration-(--duration-fast) group-hover:translate-x-0.5"
-                />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="ghost"
-              className="text-ivory/80 hover:bg-ivory/10 hover:text-ivory"
-            >
-              <Link href="/login">Sign in</Link>
-            </Button>
+            <ClosingCtaActions />
           </div>
         </div>
         <HouseElevation className="relative mx-auto max-w-sm" />
